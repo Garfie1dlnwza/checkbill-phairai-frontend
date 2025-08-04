@@ -5,6 +5,20 @@
   --foreground: #171717;
 }
 
+/* Hide number input arrows for Chrome, Safari, Edge, Opera */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+
+
+/* ...existing code... */
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
