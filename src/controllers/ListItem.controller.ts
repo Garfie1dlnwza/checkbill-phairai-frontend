@@ -3,6 +3,7 @@ export type Item = {
   name: string;
   price: number;
   qty: number;
+  shareWith: string[];
 };
 
 export const ListItemController = {

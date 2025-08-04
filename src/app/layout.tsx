@@ -1,5 +1,6 @@
 import { Noto_Sans_Thai } from "next/font/google";
 import Navbar from "@/components/layouts/navbar";
+import Background from "@/components/layouts/background";
 import "./globals.css";
 
 const notoSansThai = Noto_Sans_Thai({
@@ -22,6 +23,7 @@ export default function RootLayout({
           fontFamily: "'Noto Sans Thai', sans-serif",
         }}
       >
+        <Background />
         <Navbar />
         {children}
       </body>
