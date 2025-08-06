@@ -1,8 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, X, Users } from "lucide-react";
-import { getColor } from "@/constants/color";
+import { Plus,  Users } from "lucide-react";
 import { Item } from "@/controllers/ListItem.controller";
 import BadgeDivider from "@/components/BadgeDivider";
 
@@ -15,7 +14,6 @@ export default function DividerPage() {
   const [input, setInput] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
-  const [totalAmount, setTotalAmount] = useState(0);
   const [personAmounts, setPersonAmounts] = useState<Record<string, number>>(
     {}
   );

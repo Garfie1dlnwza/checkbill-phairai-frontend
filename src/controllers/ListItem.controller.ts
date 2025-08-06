@@ -1,5 +1,5 @@
 export type Item = {
-  id: number;
+  id: string;
   name: string;
   price: number;
   qty: number;
@@ -36,7 +36,7 @@ export const ListItemController = {
     ListItemController.saveAll(key, items);
   },
 
-  remove: (key: string, id: number) => {
+  remove: (key: string, id: string) => {
     const items = ListItemController.getAll(key).filter((i) => i.id !== id);
     ListItemController.saveAll(key, items);
   },

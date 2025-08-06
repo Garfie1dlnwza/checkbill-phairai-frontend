@@ -3,7 +3,7 @@ import { toPng } from "html-to-image";
 import { useEffect, useState } from "react";
 
 type Item = {
-  id: number;
+  id: string;
   name: string;
   price: number;
   qty: number;

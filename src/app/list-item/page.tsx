@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import SelectDividerCard from "@/components/Form/SelectDividerCard";
+import { v4 as uuidv4 } from "uuid";
 import { Plus, Trash2, ShoppingCart, Edit2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ListItemController, Item } from "@/controllers/ListItem.controller";
@@ -91,7 +91,7 @@ export default function ListItemPage() {
     );
   }, [dividerPersons]);
 
-  const handleDelete = (id: number) => {
+  const handleDelete = (id: string) => {
     setRows(rows.filter((row) => row.id !== id));
   };
 
@@ -104,7 +104,7 @@ export default function ListItemPage() {
     setRows([
       ...rows,
       {
-        id: Date.now(),
+        id: uuidv4(), 
         name: item.name,
         price: item.price,
         qty: item.qty,
@@ -114,7 +114,7 @@ export default function ListItemPage() {
   };
 
   // ลบชื่อออกจาก shareWith ของ row นั้น
-  const handleRemoveDivider = (rowId: number, name: string) => {
+  const handleRemoveDivider = (rowId: string, name: string) => {
     setRows(
       rows.map((row) =>
         row.id === rowId
@@ -124,14 +124,7 @@ export default function ListItemPage() {
     );
   };
 
-  // สำหรับ multi-select
-  const handleChangeShareWith = (rowId: number, newShareWith: string[]) => {
-    setRows(
-      rows.map((row) =>
-        row.id === rowId ? { ...row, shareWith: newShareWith } : row
-      )
-    );
-  };
+
 
   // สำหรับแก้ไขรายการ
   const handleEditItem = (item: {
@@ -279,7 +272,7 @@ export default function ListItemPage() {
                               row.shareWith.length === 1
                                 ? "justify-center"
                                 : "justify-start"
-                            }`} 
+                            }`}
                           >
                             {row.shareWith.length > 0 ? (
                               row.shareWith.map((name) => (

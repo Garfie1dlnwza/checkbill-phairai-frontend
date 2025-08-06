@@ -1,16 +1,10 @@
 "use client";
 
-import { Github, Linkedin, Mail, Instagram, User } from "lucide-react";
+import { Github, Linkedin, Mail, Instagram,} from "lucide-react";
 
 export default function ContactPage() {
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center px-4 py-16 ">
-      {/* Background decoration */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-32 w-80 h-80 rounded-full bg-purple-500/10 blur-3xl"></div>
-        <div className="absolute -bottom-40 -left-32 w-80 h-80 rounded-full bg-blue-500/10 blur-3xl"></div>
-      </div>
-
+    <div className="min-h-screen flex flex-col justify-center items-center  px-4 py-16 ">
       <div className="relative max-w-lg w-full">
         {/* Main Card */}
         <div className="bg-white/5 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/10 p-8 space-y-8">
@@ -115,9 +109,9 @@ export default function ContactPage() {
 
         {/* Footer note */}
         <p className="text-center text-gray-500 text-sm mt-6">
-            © 2023 Rawipon Ponsarutwanit. All rights reserved.
-            <br />
-            This website is not affiliated with any official entities.
+          © 2023 Rawipon Ponsarutwanit. All rights reserved.
+          <br />
+          This website is not affiliated with any official entities.
         </p>
       </div>
     </div>

@@ -5,7 +5,7 @@ import MinimalReceipt from "@/components/SummaryType/MinimalStyle";
 import ColorStyle from "@/components/SummaryType/ColorStyle";
 
 type Item = {
-  id: number;
+  id: string;
   name: string;
   price: number;
   qty: number;

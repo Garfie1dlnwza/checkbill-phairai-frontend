@@ -8,7 +8,7 @@ const DIVIDER_KEY = process.env.NEXT_PUBLIC_DIVIDER_KEY;
 const VAT_RATE = 0.07;
 
 type Item = {
-  id: number;
+  id: string;
   name: string;
   price: number;
   qty: number;
