@@ -35,6 +35,11 @@ export default function BadgeDivider({
         fontWeight: 600,
         fontSize: "1rem",
         px: 1,
+        minWidth: "max-content", // ให้ชื่อแสดงเต็ม
+        maxWidth: "100%",        // ไม่ล้นกรอบ
+        whiteSpace: "nowrap",    // ไม่ตัดขึ้นบรรทัดใหม่
+        textOverflow: "clip",    // ไม่แสดง ...
+        overflow: "visible",     // ให้แสดงเต็ม
       }}
     />
   );

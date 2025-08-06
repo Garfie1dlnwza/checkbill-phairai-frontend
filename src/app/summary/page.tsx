@@ -1,7 +1,8 @@
 "use client";
-import { toPng } from "html-to-image";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import MinimalReceipt from "@/components/SummaryType/MinimalStyle";
+import ColorStyle from "@/components/SummaryType/ColorStyle";
 
 type Item = {
   id: number;
@@ -18,20 +19,9 @@ export default function SummaryPage() {
   const searchParams = useSearchParams();
   const [items, setItems] = useState<Item[]>([]);
   const [persons, setPersons] = useState<string[]>([]);
-  const [personAmounts, setPersonAmounts] = useState<Record<string, number>>(
-    {}
+  const [receiptType, setReceiptType] = useState<"minimal" | "color">(
+    "minimal"
   );
-  const [totalBill, setTotalBill] = useState<number>(0);
-  const [hidePrinterBody, setHidePrinterBody] = useState(false);
-
-  const [isPrinting, setIsPrinting] = useState(
-    searchParams.get("print") !== "false"
-  );
-  const [printedSections, setPrintedSections] = useState<Set<string>>(
-    new Set()
-  );
-  const [currentPrintLine, setCurrentPrintLine] = useState(0);
-  const [showCutter, setShowCutter] = useState(false);
 
   useEffect(() => {
     const itemsParam = searchParams.get("items");
@@ -59,355 +49,75 @@ export default function SummaryPage() {
     setPersons(initialPersons);
   }, [searchParams]);
 
-  const VAT_RATE = 0.07; // 7%
-
-  useEffect(() => {
-    const amounts: Record<string, number> = {};
-    persons.forEach((p) => (amounts[p] = 0));
-    let calculatedTotal = 0;
-    let calculatedVat = 0;
-
-    items.forEach((item) => {
-      const itemTotal = item.price * item.qty;
-      calculatedTotal += itemTotal;
-      calculatedVat += itemTotal * VAT_RATE;
-      if (item.shareWith.length > 0) {
-        const share = itemTotal / item.shareWith.length;
-        const shareVat = (itemTotal * VAT_RATE) / item.shareWith.length;
-        item.shareWith.forEach((p) => {
-          if (amounts[p] !== undefined) amounts[p] += share + shareVat;
-        });
-      }
-    });
-
-    setPersonAmounts(amounts);
-    setTotalBill(calculatedTotal);
-    setTotalVat(calculatedVat);
-  }, [items, persons]);
-
-  const [totalVat, setTotalVat] = useState<number>(0);
-
-  useEffect(() => {
-    if (!isPrinting) return;
-
-    const sections = [
-      "header",
-      ...items.map((item) => `item-${item.id}`),
-      "total",
-      "divider",
-      "footer",
-    ];
-    let currentSection = 0;
-    let lineInSection = 0;
-
-    const printInterval = setInterval(() => {
-      if (currentSection >= sections.length) {
-        setIsPrinting(false);
-        setTimeout(() => setShowCutter(true), 500);
-        setTimeout(() => setShowCutter(false), 1500);
-        clearInterval(printInterval);
-        return;
-      }
-
-      const sectionName = sections[currentSection];
-      setPrintedSections(
-        (prev) => new Set([...prev, `${sectionName}-${lineInSection}`])
-      );
-      setCurrentPrintLine((prev) => prev + 1);
-
-      // Simulate different line counts per section
-      const linesPerSection = sectionName.startsWith("item")
-        ? 3
-        : sectionName === "header"
-        ? 3
-        : sectionName === "divider"
-        ? persons.length + 1
-        : 2;
-
-      lineInSection++;
-      if (lineInSection >= linesPerSection) {
-        lineInSection = 0;
-        currentSection++;
-      }
-    }, 300);
-
-    return () => clearInterval(printInterval);
-  }, [items.length, persons.length]);
-
-  const currentDate = new Date().toLocaleDateString("th-TH", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-
-  const isSectionVisible = (sectionName: string, lineIndex: number = 0) => {
-    return !isPrinting || printedSections.has(`${sectionName}-${lineIndex}`);
-  };
-
-  // เพิ่มฟังก์ชัน export
-  const handleExportImage = async () => {
-    setHidePrinterBody(true);
-    const node = document.getElementById("receipt-container");
-    if (!node) return;
-    try {
-      const dataUrl = await toPng(node, {
-        cacheBust: true,
-        backgroundColor: "#fff",
-      });
-      const link = document.createElement("a");
-      link.download = "receipt.png";
-      link.href = dataUrl;
-      link.click();
-    } catch (err) {
-      alert("Export failed");
-    } finally {
-      setHidePrinterBody(false);
-    }
-  };
+  const receiptOptions = [
+    {
+      value: "minimal",
+      label: "Minimal Style",
+      icon: (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          fill="currentColor"
+          viewBox="0 0 16 16"
+        >
+          <path d="M14 4.5V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h5.5L14 4.5zm-3 0A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4.5h-2z" />
+          <path d="M4.5 12.5a.5.5 0 0 1 0-1h7a.5.5 0 0 1 0 1h-7zm0-2a.5.5 0 0 1 0-1h7a.5.5 0 0 1 0 1h-7z" />
+        </svg>
+      ),
+    },
+    {
+      value: "color",
+      label: "Color Style",
+      icon: (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          fill="currentColor"
+          viewBox="0 0 16 16"
+        >
+          <path d="M12.433 10.07C14.133 10.585 16 11.15 16 8a8 8 0 1 0-15.532 2.93l-.336-.931c.214-.09.43-.185.658-.287.46-.205.93-.418 1.42-.647.49-.228.988-.464 1.482-.702.495-.24.99-.488 1.48-.74.49-.25.974-.51 1.45-.78C9.37 5.09 9.776 5 10 5c.225 0 .45.09.67.27.433.35.84.77 1.21 1.24.37.47.69.98.94 1.54.25.56.45 1.18.58 1.84.13.66.19 1.38.16 2.147l-.99.115c.03-.75-.03-1.45-.15-2.08-.12-.62-.31-1.22-.55-1.76-.24-.54-.55-1.04-.9-1.48-.35-.44-.74-.84-1.12-1.16a.5.5 0 0 0-.67-.01C9.77 6.09 9.37 6 9 6c-.375 0-.75.09-1.12.27-.434.22-.88.47-1.32.73-.44.26-.88.52-1.32.79-.43.27-.86.55-1.29.85-.43.3-.85.62-1.27.96-.42.34-.82.7-1.22 1.07l-.65-.75c.4-.37.8-.73 1.2-1.06.4-.33.82-.65 1.24-.96.42-.3.85-.6 1.28-.87.43-.27.87-.53 1.32-.78.44-.25.89-.49 1.35-.72.46-.23.92-.44 1.39-.65.46-.2.92-.38 1.38-.54l1.38-.4a6.992 6.992 0 0 1 2.94-1.88l.44.89-2.94 1.88c-.46.1-.92.24-1.38.4-.46.16-.92.33-1.38.53-.46.2-.92.42-1.39.64-.46.23-.9.48-1.35.71-.44.25-.88.5-1.32.76-.43.26-.86.53-1.28.82-.42.29-.84.6-1.24.92l-1.18 1.02.72.68c.38-.36.78-.7 1.18-.98.4-.28.8-.55 1.2-.82.4-.27.8-.52 1.2-.77.4-.25.8-.48 1.2-.7z" />
+        </svg>
+      ),
+    },
+  ];
 
   return (
-    <div className="min-h-screen flex justify-center items-start py-8 px-4 text-gray-700 ">
-      <div id="receipt-container" className="relative w-full max-w-2xl">
-        {/* Printer Body */}
-        {!hidePrinterBody && (
-          <div className="bg-gray-800 rounded-t-lg p-4 shadow-2xl">
-            <div className="bg-gray-700  rounded p-2 mb-2">
-              <div className="flex items-center gap-2">
-                <div
-                  className={`w-2 h-2 rounded-full ${
-                    isPrinting ? "bg-green-400 animate-pulse" : "bg-gray-500"
-                  }`}
-                ></div>
-                <div className="text-xs text-gray-300">
-                  {isPrinting ? "กำลังพิมพ์..." : "พร้อมใช้งาน"}
-                </div>
-              </div>
-            </div>
-            <div className="bg-gray-900 rounded p-1 relative overflow-hidden">
-              <div className="w-full h-1 bg-gray-600"></div>
-              {showCutter && (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-full h-0.5 bg-red-500 animate-pulse"></div>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Receipt Container */}
-        <div className="w-full  max-w-2xl bg-white shadow-2xl relative overflow-hidden">
-          {isPrinting && (
-            <div
-              className="absolute left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-blue-500 to-transparent animate-pulse z-10"
-              style={{
-                top: `${Math.min(currentPrintLine * 25, 400)}px`,
-                transition: "top 0.3s ease-out",
-              }}
-            ></div>
-          )}
-
-          {/* Perforated Top Edge */}
-          <div className="h-4 bg-white relative  overflow-hidden ">
-            <div
-              className="absolute top-0 left-0 w-full h-4 bg-gray-100 "
-              style={{
-                backgroundImage: `repeating-linear-gradient(90deg, transparent, transparent 8px, white 8px, white 12px)`,
-              }}
-            ></div>
-          </div>
-
-          <div className="px-6 pb-6 font-mono text-sm bg-white ">
-            {/* Header */}
-            <div
-              className={`text-center py-4 border-b border-dashed border-gray-400 text-gray-700 transition-opacity duration-300 ${
-                isSectionVisible("header", 0) ? "opacity-100" : "opacity-0"
-              }`}
-            >
-              <h1
-                className={`text-lg font-bold mb-1 transition-opacity duration-500 ${
-                  isSectionVisible("header", 0) ? "opacity-100" : "opacity-0"
-                }`}
-              >
-                ใบเสร็จรับเงิน
-              </h1>
-              <h2
-                className={`text-base font-semibold transition-opacity duration-500 delay-100 ${
-                  isSectionVisible("header", 1) ? "opacity-100" : "opacity-0"
-                }`}
-              >
-                RECEIPT
-              </h2>
-              <p
-                className={`text-xs text-gray-600 mt-2 transition-opacity duration-500 delay-200 ${
-                  isSectionVisible("header", 2) ? "opacity-100" : "opacity-0"
-                }`}
-              >
-                {currentDate}
-              </p>
-            </div>
-
-            {/* Items */}
-            <div className="py-4 space-y-2">
-              {items.map((item, index) => (
-                <div
-                  key={item.id}
-                  className={`transition-all duration-500 ${
-                    isSectionVisible(`item-${item.id}`, 0)
-                      ? "opacity-100 translate-y-0"
-                      : "opacity-0 translate-y-2"
-                  }`}
-                >
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <div className="font-semibold">{item.name}</div>
-                      <div
-                        className={`text-xs text-gray-600 transition-opacity duration-300 delay-100 ${
-                          isSectionVisible(`item-${item.id}`, 1)
-                            ? "opacity-100"
-                            : "opacity-0"
-                        }`}
-                      >
-                        {item.qty} x ฿{item.price.toLocaleString()}
-                      </div>
-                      {item.shareWith.length > 0 && (
-                        <div
-                          className={`text-xs text-gray-500 mt-1 transition-opacity duration-300 delay-200 ${
-                            isSectionVisible(`item-${item.id}`, 2)
-                              ? "opacity-100"
-                              : "opacity-0"
-                          }`}
-                        >
-                          หาร: {item.shareWith.join(", ")}
-                        </div>
-                      )}
-                    </div>
-                    <div
-                      className={`font-bold text-right ml-4 transition-opacity duration-300 delay-100 ${
-                        isSectionVisible(`item-${item.id}`, 1)
-                          ? "opacity-100"
-                          : "opacity-0"
-                      }`}
-                    >
-                      ฿{(item.price * item.qty).toLocaleString()}
-                    </div>
-                  </div>
-                  {index < items.length - 1 && (
-                    <div className="border-b border-dotted border-gray-300 mt-2"></div>
-                  )}
-                </div>
-              ))}
-            </div>
-
-            {/* Total */}
-            <div
-              className={`border-t border-dashed border-gray-400 pt-3 transition-all duration-500 ${
-                isSectionVisible("total", 0)
-                  ? "opacity-100 translate-y-0"
-                  : "opacity-0 translate-y-2"
-              }`}
-            >
-              <div className="flex justify-between text-base font-bold">
-                <span>TOTAL</span>
-                <span>฿{totalBill.toLocaleString()}</span>
-              </div>
-              <div className="flex justify-between text-sm text-gray-600 mt-1">
-                <span>VAT 7%</span>
-                <span>฿{totalVat.toLocaleString(undefined, { maximumFractionDigits: 2 })}</span>
-              </div>
-              <div className="flex justify-between text-base font-bold mt-1">
-                <span>รวมทั้งหมด</span>
-                <span>
-                  ฿{(totalBill + totalVat).toLocaleString(undefined, { maximumFractionDigits: 2 })}
-                </span>
-              </div>
-            </div>
-
-            {/* Divider */}
-            <div
-              className={`border-t border-dashed border-gray-400 mt-6 pt-4 transition-all duration-500 ${
-                isSectionVisible("divider", 0)
-                  ? "opacity-100 translate-y-0"
-                  : "opacity-0 translate-y-2"
-              }`}
-            >
-              <h3 className="text-center font-bold mb-3">ยอดแยกตามคน (รวม VAT)</h3>
-              <div className="space-y-2">
-                {persons.map((name, index) => (
-                  <div
-                    key={name}
-                    className={`flex justify-between transition-all duration-300 ${
-                      isSectionVisible("divider", index + 1)
-                        ? "opacity-100 translate-x-0"
-                        : "opacity-0 -translate-x-4"
-                    }`}
-                    style={{ transitionDelay: `${index * 100}ms` }}
-                  >
-                    <span>{name}</span>
-                    <span className="font-semibold">
-                      ฿{personAmounts[name]?.toFixed(2) || "0.00"}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Footer */}
-            <div
-              className={`text-center text-xs text-gray-500 mt-6 pt-4 border-t border-dotted border-gray-300 transition-all duration-500 ${
-                isSectionVisible("footer", 0)
-                  ? "opacity-100 translate-y-0"
-                  : "opacity-0 translate-y-2"
-              }`}
-            >
-              <p
-                className={`transition-opacity duration-300 ${
-                  isSectionVisible("footer", 0) ? "opacity-100" : "opacity-0"
-                }`}
-              >
-                ขอบคุณที่ใช้บริการ
-              </p>
-              <p
-                className={`transition-opacity duration-300 delay-200 ${
-                  isSectionVisible("footer", 1) ? "opacity-100" : "opacity-0"
-                }`}
-              >
-                THANK YOU
-              </p>
-            </div>
-          </div>
-
-          {/* Perforated Bottom Edge */}
-          <div className="h-4 bg-white relative overflow-hidden">
-            <div
-              className="absolute bottom-0 left-0 w-full h-4 bg-gray-100"
-              style={{
-                backgroundImage: `repeating-linear-gradient(90deg, transparent, transparent 8px, white 8px, white 12px)`,
-              }}
-            ></div>
-          </div>
-          {/* ปุ่ม export ในใบเสร็จ */}
-          <div className="flex justify-end px-6 py-6">
+    <div className="min-h-screen flex flex-col items-center py-8 px-4 ">
+      {/* --- Redesigned Style Selector --- */}
+      <div className=" w-full max-w-sm">
+        <div
+          role="radiogroup"
+          aria-label="Receipt Style"
+          className="flex w-full p-1 space-x-1 bg-gray-200/80 backdrop-blur-sm rounded-xl shadow-inner"
+        >
+          {receiptOptions.map((option) => (
             <button
-              onClick={handleExportImage}
-              className="flex items-center gap-2  text-gray-700  p-1 rounded-xl hover:bg-gray-200 transition-colors"
-              aria-label="Export as Image"
+              key={option.value}
+              role="radio"
+              aria-checked={receiptType === option.value}
+              onClick={() =>
+                setReceiptType(option.value as "minimal" | "color")
+              }
+              className={`flex-1 py-2.5 px-3 text-sm font-bold rounded-lg transition-all duration-300 ease-in-out flex items-center justify-center gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 ${
+                receiptType === option.value
+                  ? "bg-white text-black shadow-md"
+                  : "bg-transparent text-black hover:bg-white/60 hover:text-black-500"
+              }`}
             >
-              <svg width="18" height="18" fill="none" viewBox="0 0 24 24">
-                <path
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M12 17v-6m0 0-2 2m2-2 2 2M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7M12 3v8"
-                />
-              </svg>
-              <span className="text-sm font-medium">Export</span>
+              {option.icon}
+              {option.label}
             </button>
-          </div>
+          ))}
         </div>
       </div>
+
+      {receiptType === "minimal" ? (
+        <MinimalReceipt items={items} persons={persons} printMode={true} />
+      ) : (
+        <ColorStyle items={items} persons={persons} printMode={true} />
+      )}
     </div>
   );
 }

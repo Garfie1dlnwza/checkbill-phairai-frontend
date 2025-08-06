@@ -274,7 +274,13 @@ export default function ListItemPage() {
                         </td>
 
                         <td className="py-3 px-4 text-center relative">
-                          <div className="flex flex-wrap gap-2 justify-center mb-2">
+                          <div
+                            className={`flex flex-wrap gap-2 mb-2 ${
+                              row.shareWith.length === 1
+                                ? "justify-center"
+                                : "justify-start"
+                            }`} 
+                          >
                             {row.shareWith.length > 0 ? (
                               row.shareWith.map((name) => (
                                 <BadgeDivider
@@ -289,22 +295,6 @@ export default function ListItemPage() {
                               <span className="text-white/50">—</span>
                             )}
                           </div>
-                          {/* Popover SelectDividerCard */}
-                          {openSelect === row.id && (
-                            <div className="absolute z-20 left-1/2 -translate-x-1/2 top-10">
-                              <SelectDividerCard
-                                selected={row.shareWith}
-                                onChange={(newShareWith) => {
-                                  handleChangeShareWith(row.id, newShareWith);
-                                }}
-                                exclude={[]}
-                              />
-                              <div
-                                className="fixed inset-0 z-10"
-                                onClick={() => setOpenSelect(null)}
-                              />
-                            </div>
-                          )}
                         </td>
                         <td className="py-3 px-4 text-center flex gap-2 justify-center">
                           <button
