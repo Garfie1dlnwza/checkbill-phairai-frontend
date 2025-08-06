@@ -1,9 +1,10 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus,  Users } from "lucide-react";
+import { Plus,  Users, ChevronDown, ChevronUp } from "lucide-react";
 import { Item } from "@/controllers/ListItem.controller";
 import BadgeDivider from "@/components/BadgeDivider";
+import ShowDetailCard from "@/components/Divider/ShowDetailCard";
 
 const DIVIDER_KEY = process.env.NEXT_PUBLIC_DIVIDER_KEY || "DIVIDER_PERSONS";
 const STORAGE_KEY = process.env.NEXT_PUBLIC_STORAGE_KEY || "CHECKBILL_ITEMS";
@@ -17,13 +18,15 @@ export default function DividerPage() {
   const [personAmounts, setPersonAmounts] = useState<Record<string, number>>(
     {}
   );
+  const [selectedPersons, setSelectedPersons] = useState<string[]>([]);
+  const [items, setItems] = useState<Item[]>([]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
     const saved = localStorage.getItem(DIVIDER_KEY);
     if (saved) setPersons(JSON.parse(saved));
     setIsLoaded(true);
-  }, []); // <--- รันครั้งเดียวตอน mount
+  }, []); 
 
   useEffect(() => {
     // ดึงรายการอาหารทั้งหมดและคำนวณยอดจ่ายแต่ละคน (รวม VAT)
@@ -63,6 +66,19 @@ export default function DividerPage() {
     localStorage.setItem(DIVIDER_KEY, JSON.stringify(persons));
   }, [persons, isLoaded]);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const itemsRaw = localStorage.getItem(STORAGE_KEY);
+    if (itemsRaw) {
+      try {
+        const parsed = JSON.parse(itemsRaw);
+        if (Array.isArray(parsed)) setItems(parsed);
+      } catch {
+        setItems([]);
+      }
+    }
+  }, [persons]);
+
   const handleAdd = () => {
     const name = input.trim();
     if (!name) {
@@ -85,6 +101,15 @@ export default function DividerPage() {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInput(e.target.value);
     if (error) setError(null);
+  };
+
+  // เปลี่ยนฟังก์ชัน onClick
+  const handleTogglePerson = (name: string) => {
+    setSelectedPersons((prev) =>
+      prev.includes(name)
+        ? prev.filter((n) => n !== name)
+        : [...prev, name]
+    );
   };
 
   return (
@@ -161,19 +186,40 @@ export default function DividerPage() {
             </h2>
             <div className="flex flex-col gap-2">
               {persons.map((name) => (
-                <div
-                  key={name}
-                  className="flex justify-between items-center px-4 py-2 rounded-lg font-medium text-sm bg-white/5"
-                >
-                  <BadgeDivider name={name} handleDelete={() => handleRemove(name)} />
-                  <span className="text-emerald-400 font-semibold">
-                    ฿
-                    {personAmounts[name]
-                      ? personAmounts[name].toLocaleString(undefined, {
-                          maximumFractionDigits: 2,
-                        })
-                      : "0"}
-                  </span>
+                <div key={name}>
+                  <div
+                    className="flex justify-between items-center px-4 py-2 rounded-lg font-medium text-sm bg-white/5 cursor-pointer"
+                    onClick={() => handleTogglePerson(name)}
+                  >
+                    <div className="flex items-center gap-2">
+                      <BadgeDivider name={name} handleDelete={() => handleRemove(name)} />
+                      {selectedPersons.includes(name) ? (
+                        <ChevronUp size={18} className="text-white/60" />
+                      ) : (
+                        <ChevronDown size={18} className="text-white/60" />
+                      )}
+                    </div>
+                    <span className="text-emerald-400 font-semibold">
+                      ฿
+                      {personAmounts[name]
+                        ? personAmounts[name].toLocaleString(undefined, {
+                            maximumFractionDigits: 2,
+                          })
+                        : "0"}
+                    </span>
+                  </div>
+                  <AnimatePresence>
+                    {selectedPersons.includes(name) && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{ duration: 0.25 }}
+                      >
+                        <ShowDetailCard name={name} items={items} />
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               ))}
             </div>

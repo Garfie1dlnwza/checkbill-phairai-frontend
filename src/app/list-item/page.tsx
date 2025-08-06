@@ -16,7 +16,6 @@ export default function ListItemPage() {
   const [isLoaded, setIsLoaded] = useState(false);
   const [personCount, setPersonCount] = useState(0);
   const [dividerPersons, setDividerPersons] = useState<string[]>([]);
-  const [openSelect, setOpenSelect] = useState<number | null>(null);
   const [showCreate, setShowCreate] = useState(false);
   const [editRow, setEditRow] = useState<Item | null>(null);
 

@@ -142,7 +142,7 @@ export default function MinimalReceipt({
     <div className="min-h-screen flex justify-center items-start py-8 px-4 text-gray-700 ">
       <div id="receipt-container" className="relative w-full max-w-lg">
         {/* Receipt Container */}
-        <div className=" max-w-lg bg-white shadow-2xl relative overflow-hidden">
+        <div className=" w-full max-w-lg bg-white shadow-2xl relative overflow-hidden">
           {isPrinting && (
             <div
               className="absolute left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-blue-500 to-transparent animate-pulse z-10"
