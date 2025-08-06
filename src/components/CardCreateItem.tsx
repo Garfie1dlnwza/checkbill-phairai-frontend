@@ -1,0 +1,383 @@
+import { useEffect, useState } from "react";
+import InputItem from "@/components/Form/InputItem";
+import { X, Plus, Check } from "lucide-react";
+import { getColor } from "@/constants/color";
+
+const DIVIDER_KEY = process.env.NEXT_PUBLIC_DIVIDER_KEY || "DIVIDER_PERSONS";
+
+
+interface CardCreateItemProps {
+  onSave: (item: {
+    name: string;
+    qty: number;
+    price: number;
+    shareWith: string[];
+  }) => void;
+  onClose: () => void;
+  initialData?: {
+    name: string;
+    qty: number;
+    price: number;
+    shareWith: string[];
+  };
+}
+
+export default function CardCreateItem({
+  onSave,
+  onClose,
+  initialData,
+}: CardCreateItemProps) {
+  const [name, setName] = useState("");
+  const [qty, setQty] = useState<string>("1");
+  const [price, setPrice] = useState<string>("");
+  const [shareWith, setShareWith] = useState<string[]>([]);
+  const [dividerPersons, setDividerPersons] = useState<string[]>([]);
+  const [inputDivider, setInputDivider] = useState<string>("");
+  const [dividerError, setDividerError] = useState<string>("");
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const saved = localStorage.getItem(DIVIDER_KEY);
+    if (saved) {
+      try {
+        const arr = JSON.parse(saved);
+        setDividerPersons(Array.isArray(arr) ? arr : []);
+      } catch {
+        setDividerPersons([]);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (initialData) {
+      setName(initialData.name);
+      setQty(initialData.qty.toString());
+      setPrice(initialData.price.toString());
+      setShareWith(initialData.shareWith);
+    }
+  }, [initialData]);
+
+  const validateForm = () => {
+    const newErrors: { [key: string]: string } = {};
+
+    if (!name.trim()) {
+      newErrors.name = "กรุณาใส่ชื่อเมนู";
+    }
+
+    const qtyNum = Number(qty);
+    if (!qty.trim() || isNaN(qtyNum) || qtyNum <= 0) {
+      newErrors.qty = "จำนวนต้องเป็นตัวเลขที่มากกว่า 0";
+    }
+
+    const priceNum = Number(price);
+    if (!price.trim() || isNaN(priceNum) || priceNum < 0) {
+      newErrors.price = "ราคาต้องเป็นตัวเลขที่มากกว่าหรือเท่ากับ 0";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSave = () => {
+    if (!validateForm()) return;
+
+    onSave({
+      name: name.trim(),
+      qty: Number(qty),
+      price: Number(price),
+      shareWith,
+    });
+    onClose();
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Escape") onClose();
+    if (e.key === "Enter" && e.ctrlKey) handleSave();
+  };
+
+  const isFormValid =
+    name.trim() &&
+    qty.trim() &&
+    price.trim() &&
+    !isNaN(Number(qty)) &&
+    Number(qty) > 0 &&
+    !isNaN(Number(price)) &&
+    Number(price) >= 0;
+
+  const totalAmount = (Number(qty) || 0) * (Number(price) || 0);
+
+  const handleAddDividerPerson = () => {
+    const personName = inputDivider.trim();
+    if (!personName) {
+      setDividerError("กรุณาใส่ชื่อ");
+      return;
+    }
+    if (dividerPersons.includes(personName)) {
+      setDividerError("มีชื่อนี้อยู่แล้ว");
+      return;
+    }
+    const updated = [...dividerPersons, personName];
+    setDividerPersons(updated);
+    setInputDivider("");
+    setDividerError("");
+    if (typeof window !== "undefined") {
+      localStorage.setItem(DIVIDER_KEY, JSON.stringify(updated));
+    }
+  };
+
+  const handleSelectAll = (checked: boolean) => {
+    setShareWith(checked ? [...dividerPersons] : []);
+  };
+
+  const handlePersonToggle = (person: string) => {
+    setShareWith((prev) =>
+      prev.includes(person)
+        ? prev.filter((p) => p !== person)
+        : [...prev, person]
+    );
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 animate-fade-in"
+      onClick={onClose}
+    >
+      <div
+        className="bg-neutral-900 border border-neutral-800 rounded-2xl shadow-xl w-full max-w-3xl overflow-hidden animate-slide-up"
+        onKeyDown={handleKeyDown}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between p-6 border-b border-neutral-800">
+          <h2 className="text-xl font-semibold text-white">
+            {initialData ? "แก้ไขรายการ" : "เพิ่มรายการใหม่"}
+          </h2>
+          <button
+            onClick={onClose}
+            className="p-2 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-lg transition-colors"
+          >
+            <X size={20} />
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="p-6 space-y-6">
+          {/* Input fields in horizontal row */}
+          <div className="flex gap-4">
+            <div className="flex-1">
+              <InputItem
+                label={
+                  <>
+                    ชื่อเมนู
+                    <span className="text-red-400 ml-1 text-xs">*</span>
+                  </>
+                }
+                placeholder="เช่น ข้าวผัด, ส้มตำ"
+                type="Text"
+                value={name}
+                onChange={(e) => {
+                  setName(e.target.value);
+                  if (errors.name) setErrors({ ...errors, name: "" });
+                }}
+                className={`text-white bg-transparent border-none outline-none focus:ring-1 ${
+                  errors.name
+                    ? "ring-red-500"
+                    : "ring-neutral-700 focus:ring-white"
+                }`}
+              />
+              {errors.name && (
+                <p className="text-red-500 text-xs mt-1 px-4">{errors.name}</p>
+              )}
+            </div>
+            <div className="w-24">
+              <InputItem
+                label={
+                  <>
+                    จำนวน
+                    <span className="text-red-400 ml-1 text-xs">*</span>
+                  </>
+                }
+                placeholder="1"
+                type="Text"
+                value={qty}
+                onChange={(e) => {
+                  setQty(e.target.value);
+                  if (errors.qty) setErrors({ ...errors, qty: "" });
+                }}
+                className={`text-white bg-transparent border-none outline-none focus:ring-1 ${
+                  errors.qty
+                    ? "ring-red-500"
+                    : "ring-neutral-700 focus:ring-white"
+                }`}
+              />
+              {errors.qty && (
+                <p className="text-red-500 text-xs mt-1 px-4">{errors.qty}</p>
+              )}
+            </div>
+            <div className="w-32">
+              <InputItem
+                label={
+                  <>
+                    ราคา (บาท)
+                    <span className="text-red-400 ml-1 text-xs">*</span>
+                  </>
+                }
+                placeholder="0"
+                type="Number"
+                value={price}
+                onChange={(e) => {
+                  setPrice(e.target.value);
+                  if (errors.price) setErrors({ ...errors, price: "" });
+                }}
+                className={`text-white bg-transparent border-none outline-none focus:ring-1 ${
+                  errors.price
+                    ? "ring-red-500"
+                    : "ring-neutral-700 focus:ring-white"
+                }`}
+              />
+              {errors.price && (
+                <p className="text-red-500 text-xs mt-1 px-4">{errors.price}</p>
+              )}
+            </div>
+          </div>
+          <div className="mt-10" />
+          {/* Share With Section */}
+          {dividerPersons.length > 0 && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-medium text-neutral-400">
+                  หารกับ ({dividerPersons.length} คน)
+                </label>
+                <button
+                  onClick={() =>
+                    handleSelectAll(shareWith.length !== dividerPersons.length)
+                  }
+                  className="text-xs px-3 py-1 rounded-full bg-neutral-800 text-neutral-300 hover:bg-neutral-700 hover:text-white transition-colors"
+                >
+                  {shareWith.length === dividerPersons.length
+                    ? "ยกเลิกทั้งหมด"
+                    : "เลือกทั้งหมด"}
+                </button>
+              </div>
+
+              <div className="flex flex-wrap gap-2 max-h-60 overflow-y-auto p-2 -m-2">
+                {dividerPersons.map((person) => {
+                  const isSelected = shareWith.includes(person);
+                  return (
+                    <button
+                      key={person}
+                      onClick={() => handlePersonToggle(person)}
+                      className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-all text-sm border-2 ${
+                        isSelected
+                          ? "bg-emerald-950 border-emerald-500 text-white"
+                          : "bg-neutral-800 border-neutral-800 text-neutral-300 hover:bg-neutral-700 hover:border-neutral-600 hover:text-white"
+                      }`}
+                    >
+                      <span
+                        className={`inline-block px-2 py-0.5 rounded-full font-medium text-xs ${getColor(
+                          person
+                        )}`}
+                      >
+                        {person}
+                      </span>
+                      {isSelected && (
+                        <Check size={16} className="text-emerald-500" />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Summary */}
+              <div className="flex items-center mt-2 text-xs text-neutral-500 px-1">
+                <span>เลือกแล้ว: {shareWith.length} คน</span>
+              </div>
+            </div>
+          )}
+          <div className="mt-10" />
+          {/* Add Person */}
+          <div className="space-y-3">
+            <label className="block text-sm font-medium text-neutral-400">
+              เพิ่มคนหาร
+            </label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                placeholder="ชื่อ"
+                className="flex-1 px-4 py-3  border-b border-neutral-700  text-white placeholder-neutral-500 focus:outline-none   transition-all"
+                value={inputDivider}
+                onChange={(e) => {
+                  setInputDivider(e.target.value);
+                  if (dividerError) setDividerError("");
+                }}
+                onKeyDown={(e) => e.key === "Enter" && handleAddDividerPerson()}
+              />
+              <button
+                onClick={handleAddDividerPerson}
+                disabled={
+                  !inputDivider.trim() ||
+                  dividerPersons.includes(inputDivider.trim())
+                }
+                className="px-4 py-3 bg-white text-black rounded-lg font-medium hover:bg-gray-200 disabled:bg-neutral-800 disabled:text-neutral-500 disabled:cursor-not-allowed transition-colors"
+              >
+                <Plus size={20} />
+              </button>
+            </div>
+            {dividerError && (
+              <p className="text-red-500 text-xs mt-1 text-center">
+                {dividerError}
+              </p>
+            )}
+          </div>
+          <div className="mt-10" />
+          {/* Total Amount */}
+          {totalAmount > 0 && (
+            <div className="flex flex-col gap-1 py-3 px-4 bg-neutral-800 rounded-lg border border-neutral-700">
+              <div className="flex justify-between items-center">
+                <span className="text-neutral-400 text-sm">ยอดรวม</span>
+                <span className="text-white font-semibold">
+                  ฿{totalAmount.toLocaleString()}
+                </span>
+              </div>
+              {shareWith.length > 0 && (
+                <div className="flex justify-between items-center mt-1">
+                  <span className="text-neutral-400 text-xs">ตกคนละ</span>
+                  <span className="text-green-400 font-semibold text-sm">
+                    ฿{(totalAmount / shareWith.length).toLocaleString()}
+                  </span>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Actions */}
+        <div className="flex gap-3 p-6 border-t border-neutral-800">
+          <button
+            onClick={onClose}
+            className="flex-1 py-3 px-4 text-neutral-300 border border-neutral-700 rounded-lg hover:bg-neutral-800 hover:text-white transition-colors"
+          >
+            ยกเลิก
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={!isFormValid}
+            className={`flex-1 py-3 px-4 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors ${
+              isFormValid
+                ? "bg-white text-black hover:bg-gray-200"
+                : "bg-neutral-800 text-neutral-500 cursor-not-allowed"
+            }`}
+          >
+            {initialData ? "บันทึกการแก้ไข" : "บันทึก"}
+          </button>
+        </div>
+
+        {/* Keyboard Shortcuts */}
+        <div className="px-6 pb-4 text-xs text-neutral-600 text-center">
+          ESC เพื่อปิด • CTRL+ENTER เพื่อบันทึก
+        </div>
+      </div>
+    </div>
+  );
+}

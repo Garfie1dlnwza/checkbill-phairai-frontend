@@ -1,7 +1,7 @@
 import React from "react";
 
 type InputItemProps = {
-  label?: string;
+  label?: React.ReactNode;
   type: "Text" | "Number";
   placeholder?: string;
   value?: string | number;
@@ -35,47 +35,53 @@ export default function InputItem({
     ${className}
   `;
 
-  if (type === "Text") {
-    return (
-      <input
-        type="text"
-        placeholder={placeholder}
-        value={
-          value === undefined || value === null || Number.isNaN(value)
-            ? ""
-            : String(value)
-        }
-        onChange={onChange}
-        disabled={disabled}
-        required={required}
-        className={baseInputClasses}
-        aria-label={label}
-      />
-    );
-  }
+  const isEmpty =
+    required &&
+    (value === undefined || value === null || String(value).trim() === "");
 
-
-  if (type === "Number") {
-    return (
-      <div className="relative w-full">
+  return (
+    <div>
+      {label && (
+        <label className="block text-sm font-medium text-white mb-1">
+          {label}
+        </label>
+      )}
+      {type === "Text" && (
         <input
-          type="number"
+          type="text"
           placeholder={placeholder}
-          value={value ?? ""}
+          value={
+            value === undefined || value === null || Number.isNaN(value)
+              ? ""
+              : String(value)
+          }
           onChange={onChange}
           disabled={disabled}
           required={required}
-          min="0"
-          step="0.01"
-          className={`${baseInputClasses} pr-12`}
-          aria-label={label}
+          className={baseInputClasses}
+          aria-label={typeof label === "string" ? label : undefined}
         />
-        <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none">
-          <span className="text-white/60 text-sm font-medium">บาท</span>
+      )}
+      {type === "Number" && (
+        <div className="relative w-full">
+          <input
+            type="number"
+            placeholder={placeholder}
+            value={value ?? ""}
+            onChange={onChange}
+            disabled={disabled}
+            required={required}
+            min="0"
+            step="0.01"
+            className={`${baseInputClasses} pr-12`}
+            aria-label={typeof label === "string" ? label : undefined}
+          />
+          <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none">
+            <span className="text-white/60 text-sm font-medium">บาท</span>
+          </div>
         </div>
-      </div>
-    );
-  }
-
-  return null;
+      )}
+      {isEmpty && <p className="text-red-400 text-xs mt-1">* จำเป็นต้องกรอก</p>}
+    </div>
+  );
 }

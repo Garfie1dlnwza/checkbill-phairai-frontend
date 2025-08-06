@@ -2,21 +2,61 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, X, Users } from "lucide-react";
+import { getColor } from "@/constants/color";
+import { Item } from "@/controllers/ListItem.controller";
+import BadgeDivider from "@/components/BadgeDivider";
 
 const DIVIDER_KEY = process.env.NEXT_PUBLIC_DIVIDER_KEY || "DIVIDER_PERSONS";
+const STORAGE_KEY = process.env.NEXT_PUBLIC_STORAGE_KEY || "CHECKBILL_ITEMS";
 
 export default function DividerPage() {
   const [persons, setPersons] = useState<string[]>([]);
   const [input, setInput] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [totalAmount, setTotalAmount] = useState(0);
+  const [personAmounts, setPersonAmounts] = useState<Record<string, number>>(
+    {}
+  );
 
   useEffect(() => {
     if (typeof window === "undefined") return;
     const saved = localStorage.getItem(DIVIDER_KEY);
     if (saved) setPersons(JSON.parse(saved));
     setIsLoaded(true);
-  }, []);
+  }, []); // <--- รันครั้งเดียวตอน mount
+
+  useEffect(() => {
+    // ดึงรายการอาหารทั้งหมดและคำนวณยอดจ่ายแต่ละคน
+    if (typeof window === "undefined") return;
+    const itemsRaw = localStorage.getItem(STORAGE_KEY);
+    if (itemsRaw) {
+      try {
+        const items = JSON.parse(itemsRaw);
+        const amounts: Record<string, number> = {};
+        if (Array.isArray(items)) {
+          persons.forEach((person) => {
+            amounts[person] = 0;
+          });
+          items.forEach((item: Item) => {
+            if (Array.isArray(item.shareWith) && item.shareWith.length > 0) {
+              const share =
+                (Number(item.price || 0) * Number(item.qty || 0)) /
+                item.shareWith.length;
+              item.shareWith.forEach((person: string) => {
+                if (amounts[person] !== undefined) {
+                  amounts[person] += share;
+                }
+              });
+            }
+          });
+        }
+        setPersonAmounts(amounts);
+      } catch {
+        setPersonAmounts({});
+      }
+    }
+  }, [persons]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -81,7 +121,7 @@ export default function DividerPage() {
           <h2 className="text-lg font-semibold text-white/80 mb-4">
             สมาชิก ({persons.length})
           </h2>
-          <div className="space-y-3">
+          <div className="flex flex-wrap gap-2">
             <AnimatePresence>
               {persons.length > 0 ? (
                 persons.map((name) => (
@@ -91,34 +131,18 @@ export default function DividerPage() {
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, x: -50, transition: { duration: 0.2 } }}
-                    className="flex justify-between items-center px-4 py-3 bg-white/10 rounded-lg text-white"
                   >
-                    <div
-                      className="w-9 h-9 flex items-center justify-center rounded-full mr-3 font-bold text-lg uppercase"
-                      style={{
-                        background: `hsl(${
-                          (name.charCodeAt(0) * 39) % 360
-                        }, 70%, 60%)`,
-                        color: "#222",
-                      }}
-                    >
-                      {name.charAt(0)}
-                    </div>
-                    <span className="flex-1">{name}</span>
-                    <button
-                      onClick={() => handleRemove(name)}
-                      className="p-1 rounded-full text-white/50 hover:bg-white/20 hover:text-white transition-colors"
-                      aria-label={`Remove ${name}`}
-                    >
-                      <X size={18} />
-                    </button>
+                    <BadgeDivider
+                      name={name}
+                      handleDelete={() => handleRemove(name)}
+                    />
                   </motion.div>
                 ))
               ) : (
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1, transition: { delay: 0.2 } }}
-                  className="text-center py-10 px-4 border-2 border-dashed border-white/20 rounded-lg"
+                  className="text-center py-10 px-4 border-2 border-dashed border-white/20 rounded-lg w-full"
                 >
                   <Users className="mx-auto text-white/30" size={40} />
                   <p className="text-white/60 mt-4">
@@ -129,6 +153,36 @@ export default function DividerPage() {
             </AnimatePresence>
           </div>
         </div>
+
+        {/* แสดงจำนวนเงินที่แต่ละคนต้องจ่าย */}
+        {persons.length > 0 && (
+          <div className="mt-8">
+            <h2 className="text-lg font-semibold text-white/80 mb-2">
+              สรุปยอดจ่ายแต่ละคน
+            </h2>
+            <div className="flex flex-col gap-2">
+              {persons.map((name) => (
+                <div
+                  key={name}
+                  className="flex justify-between items-center px-4 py-2 rounded-lg font-medium text-sm bg-white/5"
+                >
+                  <BadgeDivider name={name} handleDelete={() => handleRemove(name)} />
+                  <span className="text-emerald-400 font-semibold">
+                    ฿
+                    {personAmounts[name]
+                      ? personAmounts[name].toLocaleString(undefined, {
+                          maximumFractionDigits: 2,
+                        })
+                      : "0"}
+                  </span>
+                </div>
+              ))}
+            </div>
+            <p className="text-xs text-white/50 mt-2 text-center">
+              *หมายเหตุ: ระบบจะบันทึกข้อมูลชื่อสมาชิกไว้ในเครื่องของคุณเท่านั้น
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

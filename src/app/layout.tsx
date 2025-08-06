@@ -1,6 +1,6 @@
 import { Noto_Sans_Thai } from "next/font/google";
-import Navbar from "@/components/layouts/navbar";
-import Background from "@/components/layouts/background";
+import Navbar from "@/components/Layouts/navbar";
+import Background from "@/components/Layouts/background";
 import "./globals.css";
 
 const notoSansThai = Noto_Sans_Thai({
