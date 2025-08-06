@@ -9,6 +9,8 @@ import BadgeDivider from "@/components/BadgeDivider";
 const STORAGE_KEY = process.env.NEXT_PUBLIC_STORAGE_KEY;
 const DIVIDER_KEY = process.env.NEXT_PUBLIC_DIVIDER_KEY;
 
+const VAT_RATE = 0.07; // 7%
+
 export default function ListItemPage() {
   const [rows, setRows] = useState<Item[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -89,39 +91,8 @@ export default function ListItemPage() {
     );
   }, [dividerPersons]);
 
-  const handleChange = (id: number, field: string, value: string | number) => {
-    setRows(
-      rows.map((row) =>
-        row.id === id
-          ? {
-              ...row,
-              [field]:
-                field === "name"
-                  ? value
-                  : value === "" || isNaN(Number(value))
-                  ? 0
-                  : Number(value),
-            }
-          : row
-      )
-    );
-  };
-
   const handleDelete = (id: number) => {
     setRows(rows.filter((row) => row.id !== id));
-  };
-
-  const handleAdd = () => {
-    setRows([
-      ...rows,
-      {
-        id: Date.now(),
-        name: "",
-        price: 0,
-        qty: 1,
-        shareWith: [],
-      },
-    ]);
   };
 
   const handleAddItem = (item: {
@@ -140,17 +111,6 @@ export default function ListItemPage() {
         shareWith: item.shareWith,
       },
     ]);
-  };
-
-  // เพิ่มชื่อเข้า shareWith ของ row นั้น
-  const handleSelectDivider = (rowId: number, name: string) => {
-    setRows(
-      rows.map((row) =>
-        row.id === rowId && !row.shareWith.includes(name)
-          ? { ...row, shareWith: [...row.shareWith, name] }
-          : row
-      )
-    );
   };
 
   // ลบชื่อออกจาก shareWith ของ row นั้น
@@ -232,7 +192,7 @@ export default function ListItemPage() {
             <table className="w-full text-white table-fixed">
               <thead>
                 <tr className="border-b border-white/20 bg-white/10">
-                  <th className="py-3 px-4 text-lg font-semibold text-center w-1/5">
+                  <th className="py-3 px-4 text-lg font-semibold text-center w-1/12">
                     เมนู
                   </th>
                   <th className="py-3 px-4 text-lg font-semibold text-center w-1/12">
@@ -244,9 +204,13 @@ export default function ListItemPage() {
                   <th className="py-3 px-4 text-lg font-semibold text-center w-1/12">
                     รวม
                   </th>
+                  <th className="py-3 px-4 text-lg font-semibold text-center w-2/12">
+                    VAT ต่อคน
+                  </th>
                   <th className="py-3 px-4 text-lg font-semibold text-center w-1/12">
                     ตกคนละ
                   </th>
+
                   <th className="py-3 px-4 text-lg font-semibold text-center w-2/6">
                     คนหาร
                   </th>
@@ -260,9 +224,11 @@ export default function ListItemPage() {
                   {rows.map((row) => {
                     const sum = Number(row.price) * Number(row.qty);
                     const perPerson =
-                      row.shareWith.length > 0
-                        ? sum / row.shareWith.length
-                        : 0;
+                      row.shareWith.length > 0 ? sum / row.shareWith.length : 0;
+                    const vatPerPerson =
+                      row.shareWith.length > 0 ? perPerson * VAT_RATE : 0;
+                    const perPersonWithVat =
+                      row.shareWith.length > 0 ? perPerson + vatPerPerson : 0;
                     return (
                       <motion.tr
                         key={row.id}
@@ -292,13 +258,21 @@ export default function ListItemPage() {
                         <td className="py-3 px-4 text-center font-semibold">
                           {sum.toLocaleString()}
                         </td>
-                        <td className="py-3 px-4 text-center text-green-400 font-semibold">
+                        <td className="py-3 px-4 text-center text-yellow-400 font-semibold">
                           {row.shareWith.length > 0
-                            ? perPerson.toLocaleString(undefined, {
+                            ? vatPerPerson.toLocaleString(undefined, {
                                 maximumFractionDigits: 2,
                               })
                             : "—"}
                         </td>
+                        <td className="py-3 px-4 text-center text-green-400 font-semibold">
+                          {row.shareWith.length > 0
+                            ? perPersonWithVat.toLocaleString(undefined, {
+                                maximumFractionDigits: 2,
+                              })
+                            : "—"}
+                        </td>
+
                         <td className="py-3 px-4 text-center relative">
                           <div className="flex flex-wrap gap-2 justify-center mb-2">
                             {row.shareWith.length > 0 ? (

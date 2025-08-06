@@ -59,25 +59,33 @@ export default function SummaryPage() {
     setPersons(initialPersons);
   }, [searchParams]);
 
+  const VAT_RATE = 0.07; // 7%
+
   useEffect(() => {
     const amounts: Record<string, number> = {};
     persons.forEach((p) => (amounts[p] = 0));
     let calculatedTotal = 0;
+    let calculatedVat = 0;
 
     items.forEach((item) => {
       const itemTotal = item.price * item.qty;
       calculatedTotal += itemTotal;
+      calculatedVat += itemTotal * VAT_RATE;
       if (item.shareWith.length > 0) {
         const share = itemTotal / item.shareWith.length;
+        const shareVat = (itemTotal * VAT_RATE) / item.shareWith.length;
         item.shareWith.forEach((p) => {
-          if (amounts[p] !== undefined) amounts[p] += share;
+          if (amounts[p] !== undefined) amounts[p] += share + shareVat;
         });
       }
     });
 
     setPersonAmounts(amounts);
     setTotalBill(calculatedTotal);
+    setTotalVat(calculatedVat);
   }, [items, persons]);
+
+  const [totalVat, setTotalVat] = useState<number>(0);
 
   useEffect(() => {
     if (!isPrinting) return;
@@ -304,6 +312,16 @@ export default function SummaryPage() {
                 <span>TOTAL</span>
                 <span>฿{totalBill.toLocaleString()}</span>
               </div>
+              <div className="flex justify-between text-sm text-gray-600 mt-1">
+                <span>VAT 7%</span>
+                <span>฿{totalVat.toLocaleString(undefined, { maximumFractionDigits: 2 })}</span>
+              </div>
+              <div className="flex justify-between text-base font-bold mt-1">
+                <span>รวมทั้งหมด</span>
+                <span>
+                  ฿{(totalBill + totalVat).toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                </span>
+              </div>
             </div>
 
             {/* Divider */}
@@ -314,7 +332,7 @@ export default function SummaryPage() {
                   : "opacity-0 translate-y-2"
               }`}
             >
-              <h3 className="text-center font-bold mb-3">ยอดแยกตามคน</h3>
+              <h3 className="text-center font-bold mb-3">ยอดแยกตามคน (รวม VAT)</h3>
               <div className="space-y-2">
                 {persons.map((name, index) => (
                   <div

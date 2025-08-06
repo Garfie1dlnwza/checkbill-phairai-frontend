@@ -8,6 +8,7 @@ import BadgeDivider from "@/components/BadgeDivider";
 
 const DIVIDER_KEY = process.env.NEXT_PUBLIC_DIVIDER_KEY || "DIVIDER_PERSONS";
 const STORAGE_KEY = process.env.NEXT_PUBLIC_STORAGE_KEY || "CHECKBILL_ITEMS";
+const VAT_RATE = 0.07; // 7%
 
 export default function DividerPage() {
   const [persons, setPersons] = useState<string[]>([]);
@@ -27,7 +28,7 @@ export default function DividerPage() {
   }, []); // <--- รันครั้งเดียวตอน mount
 
   useEffect(() => {
-    // ดึงรายการอาหารทั้งหมดและคำนวณยอดจ่ายแต่ละคน
+    // ดึงรายการอาหารทั้งหมดและคำนวณยอดจ่ายแต่ละคน (รวม VAT)
     if (typeof window === "undefined") return;
     const itemsRaw = localStorage.getItem(STORAGE_KEY);
     if (itemsRaw) {
@@ -40,12 +41,12 @@ export default function DividerPage() {
           });
           items.forEach((item: Item) => {
             if (Array.isArray(item.shareWith) && item.shareWith.length > 0) {
-              const share =
-                (Number(item.price || 0) * Number(item.qty || 0)) /
-                item.shareWith.length;
+              const sum = Number(item.price || 0) * Number(item.qty || 0);
+              const perPerson = sum / item.shareWith.length;
+              const perPersonWithVat = perPerson + perPerson * VAT_RATE;
               item.shareWith.forEach((person: string) => {
                 if (amounts[person] !== undefined) {
-                  amounts[person] += share;
+                  amounts[person] += perPersonWithVat;
                 }
               });
             }

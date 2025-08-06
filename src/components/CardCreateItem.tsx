@@ -105,7 +105,12 @@ export default function CardCreateItem({
     !isNaN(Number(price)) &&
     Number(price) >= 0;
 
+  const VAT_RATE = 0.07;
   const totalAmount = (Number(qty) || 0) * (Number(price) || 0);
+  const vatAmount = totalAmount * VAT_RATE;
+  const totalWithVat = totalAmount + vatAmount;
+  const perPersonWithVat =
+    shareWith.length > 0 ? totalWithVat / shareWith.length : 0;
 
   const handleAddDividerPerson = () => {
     const personName = inputDivider.trim();
@@ -340,11 +345,23 @@ export default function CardCreateItem({
                   ฿{totalAmount.toLocaleString()}
                 </span>
               </div>
+              <div className="flex justify-between items-center mt-1">
+                <span className="text-neutral-400 text-xs">VAT 7%</span>
+                <span className="text-yellow-400 font-semibold text-sm">
+                  ฿{vatAmount.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                </span>
+              </div>
+              <div className="flex justify-between items-center mt-1">
+                <span className="text-neutral-400 text-xs">รวมทั้งหมด</span>
+                <span className="text-green-400 font-semibold text-sm">
+                  ฿{totalWithVat.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                </span>
+              </div>
               {shareWith.length > 0 && (
                 <div className="flex justify-between items-center mt-1">
-                  <span className="text-neutral-400 text-xs">ตกคนละ</span>
-                  <span className="text-green-400 font-semibold text-sm">
-                    ฿{(totalAmount / shareWith.length).toLocaleString()}
+                  <span className="text-neutral-400 text-xs">ตกคนละ (รวม VAT)</span>
+                  <span className="text-emerald-400 font-semibold text-sm">
+                    ฿{perPersonWithVat.toLocaleString(undefined, { maximumFractionDigits: 2 })}
                   </span>
                 </div>
               )}
