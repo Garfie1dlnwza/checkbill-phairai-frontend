@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import MinimalReceipt from "@/components/SummaryType/MinimalStyle";
 import ColorStyle from "@/components/SummaryType/ColorStyle";
@@ -15,13 +15,11 @@ type Item = {
 const STORAGE_KEY = process.env.NEXT_PUBLIC_STORAGE_KEY;
 const DIVIDER_KEY = process.env.NEXT_PUBLIC_DIVIDER_KEY;
 
-export default function SummaryPage() {
+function SummaryPageContent() {
   const searchParams = useSearchParams();
   const [items, setItems] = useState<Item[]>([]);
   const [persons, setPersons] = useState<string[]>([]);
-  const [receiptType, setReceiptType] = useState<"minimal" | "color">(
-    "minimal"
-  );
+  const [receiptType, setReceiptType] = useState<"minimal" | "color">("minimal");
 
   useEffect(() => {
     const itemsParam = searchParams.get("items");
@@ -119,5 +117,13 @@ export default function SummaryPage() {
         <ColorStyle items={items} persons={persons} printMode={true} />
       )}
     </div>
+  );
+}
+
+export default function SummaryPage() {
+  return (
+    <Suspense>
+      <SummaryPageContent />
+    </Suspense>
   );
 }

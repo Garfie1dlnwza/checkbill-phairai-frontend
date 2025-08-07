@@ -149,7 +149,7 @@ export default function ColorStyle({ items: propItems, persons: propPersons, pri
     <div className="min-h-screen flex justify-center items-start py-12 px-4 text-neutral-800">
       <div
         id="color-style-receipt"
-        className="w-full max-w-lg mx-auto bg-white rounded-2xl shadow-2xl p-10 space-y-8 font-mono border border-neutral-200 relative overflow-hidden"
+        className="w-full min-w-lg max-w-lg mx-auto bg-white rounded-2xl shadow-2xl p-10 space-y-8 font-mono border border-neutral-200 relative overflow-hidden"
       >
         {/* Printer Animation Bar */}
         {isPrinting && (
