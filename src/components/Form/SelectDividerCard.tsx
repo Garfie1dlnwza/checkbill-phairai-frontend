@@ -17,6 +17,7 @@ export default function SelectDividerCard({
 
   useEffect(() => {
     if (typeof window === "undefined") return;
+    if (!DIVIDER_KEY) return;
     const saved = localStorage.getItem(DIVIDER_KEY);
     if (saved) {
       try {
