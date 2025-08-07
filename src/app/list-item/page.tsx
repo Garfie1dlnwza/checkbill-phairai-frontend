@@ -19,14 +19,12 @@ export default function ListItemPage() {
   const [showCreate, setShowCreate] = useState(false);
   const [editRow, setEditRow] = useState<Item | null>(null);
 
-  // โหลดข้อมูลรายการอาหาร
   useEffect(() => {
     if (!STORAGE_KEY) return;
     setRows(ListItemController.getAll(STORAGE_KEY));
     setIsLoaded(true);
   }, []);
 
-  // บันทึกข้อมูลรายการอาหารเมื่อ rows เปลี่ยน
   useEffect(() => {
     if (!STORAGE_KEY) return;
     if (!isLoaded) return;

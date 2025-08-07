@@ -3,7 +3,7 @@ import InputItem from "@/components/Form/InputItem";
 import { X, Plus, Check } from "lucide-react";
 import { getColor } from "@/constants/color";
 
-const DIVIDER_KEY = process.env.NEXT_PUBLIC_DIVIDER_KEY || "DIVIDER_PERSONS";
+const DIVIDER_KEY = process.env.NEXT_PUBLIC_DIVIDER_KEY;
 
 
 interface CardCreateItemProps {
@@ -38,6 +38,7 @@ export default function CardCreateItem({
 
   useEffect(() => {
     if (typeof window === "undefined") return;
+    if(!DIVIDER_KEY) return;
     const saved = localStorage.getItem(DIVIDER_KEY);
     if (saved) {
       try {
@@ -127,6 +128,7 @@ export default function CardCreateItem({
     setInputDivider("");
     setDividerError("");
     if (typeof window !== "undefined") {
+      if (!DIVIDER_KEY) return;
       localStorage.setItem(DIVIDER_KEY, JSON.stringify(updated));
     }
   };
