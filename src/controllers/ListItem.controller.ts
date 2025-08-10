@@ -4,6 +4,7 @@ export type Item = {
   price: number;
   qty: number;
   shareWith: string[];
+  includeVat?: boolean; 
 };
 
 export const ListItemController = {

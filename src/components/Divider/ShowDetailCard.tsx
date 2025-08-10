@@ -20,7 +20,7 @@ export default function ShowDetailCard({ name, items }: ShowDetailCardProps) {
         <ul className="space-y-3">
           {filteredItems.map((item, idx) => {
             const perPerson = (item.price * item.qty) / item.shareWith.length;
-            const vat = perPerson * VAT_RATE;
+            const vat = item.includeVat ? perPerson * VAT_RATE : 0;
             return (
               <li key={idx} className="flex flex-col gap-1 bg-white/5 rounded-xl px-4 py-3">
                 <div className="flex justify-between items-center">
@@ -29,11 +29,13 @@ export default function ShowDetailCard({ name, items }: ShowDetailCardProps) {
                   </span>
                   <div className="text-right">
                     <span className="block text-emerald-300 font-semibold text-base">
-                      ฿{perPerson.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                      ฿{(perPerson + vat).toLocaleString(undefined, { maximumFractionDigits: 2 })}
                     </span>
-                    <span className="block text-xs text-white/50">
-                      ฿{vat.toLocaleString(undefined, { maximumFractionDigits: 2 })} <span className="ml-1">VAT 7%</span>
-                    </span>
+                    {item.includeVat && (
+                      <span className="block text-xs text-white/50">
+                        ฿{vat.toLocaleString(undefined, { maximumFractionDigits: 2 })} <span className="ml-1">VAT 7%</span>
+                      </span>
+                    )}
                   </div>
                 </div>
               </li>

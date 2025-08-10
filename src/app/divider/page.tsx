@@ -29,7 +29,7 @@ export default function DividerPage() {
   }, []); 
 
   useEffect(() => {
-    // ดึงรายการอาหารทั้งหมดและคำนวณยอดจ่ายแต่ละคน (รวม VAT)
+    // ดึงรายการอาหารทั้งหมดและคำนวณยอดจ่ายแต่ละคน (รวม VAT เฉพาะเมนูที่เลือก)
     if (typeof window === "undefined") return;
     const itemsRaw = localStorage.getItem(STORAGE_KEY);
     if (itemsRaw) {
@@ -44,7 +44,8 @@ export default function DividerPage() {
             if (Array.isArray(item.shareWith) && item.shareWith.length > 0) {
               const sum = Number(item.price || 0) * Number(item.qty || 0);
               const perPerson = sum / item.shareWith.length;
-              const perPersonWithVat = perPerson + perPerson * VAT_RATE;
+              const vat = item.includeVat ? perPerson * VAT_RATE : 0;
+              const perPersonWithVat = perPerson + vat;
               item.shareWith.forEach((person: string) => {
                 if (amounts[person] !== undefined) {
                   amounts[person] += perPersonWithVat;

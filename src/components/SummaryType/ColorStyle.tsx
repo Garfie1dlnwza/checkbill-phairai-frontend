@@ -12,12 +12,14 @@ type Item = {
   name: string;
   price: number;
   qty: number;
+  includeVat?: boolean;
   shareWith: string[];
 };
 
 interface ColorStyleProps {
   items?: Item[];
   persons?: string[];
+  includeVat?: boolean;
   printMode?: boolean;
 }
 
@@ -52,11 +54,12 @@ export default function ColorStyle({ items: propItems, persons: propPersons, pri
     items.forEach((item) => {
       const itemTotal = item.price * item.qty;
       calculatedTotal += itemTotal;
-      calculatedVat += itemTotal * VAT_RATE;
+      const itemVat = item.includeVat ? itemTotal * VAT_RATE : 0;
+      calculatedVat += itemVat;
 
       if (item.shareWith.length > 0) {
         const share = itemTotal / item.shareWith.length;
-        const shareVat = (itemTotal * VAT_RATE) / item.shareWith.length;
+        const shareVat = itemVat / item.shareWith.length;
         item.shareWith.forEach((p) => {
           if (amounts[p] !== undefined) amounts[p] += share + shareVat;
         });

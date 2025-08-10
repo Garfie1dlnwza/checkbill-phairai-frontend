@@ -43,7 +43,7 @@ export default function Navbar() {
 
   return (
     
-    <nav className="sticky top-4 z-50 mx-auto w-full max-w-2xl px-4 ">
+    <nav className="sticky top-4 z-10 mx-auto w-full max-w-2xl px-4 ">
       <div className="backdrop-blur-xl border border-white/30 px-6 py-3 shadow-2xl rounded-2xl">
         <div className="flex h-14 items-center justify-between px-4 md:px-6">
           {/* Center: Desktop nav */}

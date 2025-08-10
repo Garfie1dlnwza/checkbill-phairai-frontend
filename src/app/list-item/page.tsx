@@ -99,15 +99,17 @@ export default function ListItemPage() {
     qty: number;
     price: number;
     shareWith: string[];
+    includeVat?: boolean;
   }) => {
     setRows([
       ...rows,
       {
-        id: uuidv4(), 
+        id: uuidv4(),
         name: item.name,
         price: item.price,
         qty: item.qty,
         shareWith: item.shareWith,
+        includeVat: item.includeVat ?? false, // เพิ่มตรงนี้
       },
     ]);
   };
@@ -123,14 +125,13 @@ export default function ListItemPage() {
     );
   };
 
-
-
   // สำหรับแก้ไขรายการ
   const handleEditItem = (item: {
     name: string;
     qty: number;
     price: number;
     shareWith: string[];
+    includeVat?: boolean;
   }) => {
     if (!editRow) return;
     setRows(
@@ -142,6 +143,7 @@ export default function ListItemPage() {
               qty: item.qty,
               price: item.price,
               shareWith: item.shareWith,
+              includeVat: item.includeVat ?? false, // เพิ่มตรงนี้
             }
           : row
       )
@@ -218,7 +220,7 @@ export default function ListItemPage() {
                     const perPerson =
                       row.shareWith.length > 0 ? sum / row.shareWith.length : 0;
                     const vatPerPerson =
-                      row.shareWith.length > 0 ? perPerson * VAT_RATE : 0;
+                      row.includeVat && row.shareWith.length > 0 ? perPerson * VAT_RATE : 0;
                     const perPersonWithVat =
                       row.shareWith.length > 0 ? perPerson + vatPerPerson : 0;
                     return (
@@ -338,6 +340,7 @@ export default function ListItemPage() {
               qty: editRow.qty,
               price: editRow.price,
               shareWith: editRow.shareWith,
+              includeVat: editRow.includeVat, // เพิ่มตรงนี้
             }}
           />
         )}

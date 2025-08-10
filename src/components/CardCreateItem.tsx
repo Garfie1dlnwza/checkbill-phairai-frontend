@@ -2,9 +2,9 @@ import { useEffect, useState } from "react";
 import InputItem from "@/components/Form/InputItem";
 import { X, Plus, Check } from "lucide-react";
 import { getColor } from "@/constants/color";
+import CheckBox from "@/components/Custom/CheckBox";
 
 const DIVIDER_KEY = process.env.NEXT_PUBLIC_DIVIDER_KEY || "DIVIDER_PERSONS";
-
 
 interface CardCreateItemProps {
   onSave: (item: {
@@ -12,6 +12,7 @@ interface CardCreateItemProps {
     qty: number;
     price: number;
     shareWith: string[];
+    includeVat?: boolean;
   }) => void;
   onClose: () => void;
   initialData?: {
@@ -19,6 +20,7 @@ interface CardCreateItemProps {
     qty: number;
     price: number;
     shareWith: string[];
+    includeVat?: boolean;
   };
 }
 
@@ -35,6 +37,7 @@ export default function CardCreateItem({
   const [inputDivider, setInputDivider] = useState<string>("");
   const [dividerError, setDividerError] = useState<string>("");
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [includeVat, setIncludeVat] = useState(false);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -87,6 +90,7 @@ export default function CardCreateItem({
       qty: Number(qty),
       price: Number(price),
       shareWith,
+      includeVat,
     });
     onClose();
   };
@@ -105,9 +109,10 @@ export default function CardCreateItem({
     !isNaN(Number(price)) &&
     Number(price) >= 0;
 
+
   const VAT_RATE = 0.07;
   const totalAmount = (Number(qty) || 0) * (Number(price) || 0);
-  const vatAmount = totalAmount * VAT_RATE;
+  const vatAmount = includeVat ? totalAmount * VAT_RATE : 0;
   const totalWithVat = totalAmount + vatAmount;
   const perPersonWithVat =
     shareWith.length > 0 ? totalWithVat / shareWith.length : 0;
@@ -246,6 +251,15 @@ export default function CardCreateItem({
               )}
             </div>
           </div>
+          {/* VAT Option */}
+          <div className="flex gap-2 mb-4">
+            <CheckBox
+              checked={includeVat}
+              onChange={setIncludeVat}
+              id="includeVat"
+              label="คิด VAT 7% สำหรับเมนูนี้"
+            />
+          </div>
           <div className="mt-10" />
           {/* Share With Section */}
           {dividerPersons.length > 0 && (
@@ -348,20 +362,31 @@ export default function CardCreateItem({
               <div className="flex justify-between items-center mt-1">
                 <span className="text-neutral-400 text-xs">VAT 7%</span>
                 <span className="text-yellow-400 font-semibold text-sm">
-                  ฿{vatAmount.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                  ฿
+                  {vatAmount.toLocaleString(undefined, {
+                    maximumFractionDigits: 2,
+                  })}
                 </span>
               </div>
               <div className="flex justify-between items-center mt-1">
                 <span className="text-neutral-400 text-xs">รวมทั้งหมด</span>
                 <span className="text-green-400 font-semibold text-sm">
-                  ฿{totalWithVat.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                  ฿
+                  {totalWithVat.toLocaleString(undefined, {
+                    maximumFractionDigits: 2,
+                  })}
                 </span>
               </div>
               {shareWith.length > 0 && (
                 <div className="flex justify-between items-center mt-1">
-                  <span className="text-neutral-400 text-xs">ตกคนละ (รวม VAT)</span>
+                  <span className="text-neutral-400 text-xs">
+                    ตกคนละ (รวม VAT)
+                  </span>
                   <span className="text-emerald-400 font-semibold text-sm">
-                    ฿{perPersonWithVat.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                    ฿
+                    {perPersonWithVat.toLocaleString(undefined, {
+                      maximumFractionDigits: 2,
+                    })}
                   </span>
                 </div>
               )}

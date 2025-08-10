@@ -15,6 +15,13 @@ input[type="number"] {
   -moz-appearance: textfield;
 }
 
+input[type="checkbox"] {
+  border-radius: 9999px;
+  width: 1rem;
+  height: 1rem;
+  accent-color: #018127; /* emerald-500 */
+}
+
 
 @media (prefers-color-scheme: dark) {
   :root {
@@ -28,3 +35,4 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+

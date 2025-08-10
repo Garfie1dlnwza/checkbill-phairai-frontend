@@ -8,6 +8,7 @@ type Item = {
   price: number;
   qty: number;
   shareWith: string[];
+  includeVat?: boolean; 
 };
 
 interface MinimalReceiptProps {
@@ -45,10 +46,11 @@ export default function MinimalReceipt({
     items.forEach((item) => {
       const itemTotal = item.price * item.qty;
       calculatedTotal += itemTotal;
-      calculatedVat += itemTotal * VAT_RATE;
+      const itemVat = item.includeVat ? itemTotal * VAT_RATE : 0;
+      calculatedVat += itemVat;
       if (item.shareWith.length > 0) {
         const share = itemTotal / item.shareWith.length;
-        const shareVat = (itemTotal * VAT_RATE) / item.shareWith.length;
+        const shareVat = itemVat / item.shareWith.length;
         item.shareWith.forEach((p) => {
           if (amounts[p] !== undefined) amounts[p] += share + shareVat;
         });
@@ -332,7 +334,7 @@ export default function MinimalReceipt({
               </p>
             </div>
           </div>
-
+            
           {/* Perforated Bottom Edge */}
           <div className="h-4 bg-white relative overflow-hidden">
             <div
@@ -343,24 +345,26 @@ export default function MinimalReceipt({
             ></div>
           </div>
           {/* ปุ่ม export ในใบเสร็จ */}
-          <div className="flex justify-end px-6 py-6">
-            <button
-              onClick={handleExportImage}
-              className="flex items-center gap-2  text-gray-700  p-1 rounded-xl hover:bg-gray-200 transition-colors"
-              aria-label="Export as Image"
-            >
-              <svg width="18" height="18" fill="none" viewBox="0 0 24 24">
-                <path
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M12 17v-6m0 0-2 2m2-2 2 2M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7M12 3v8"
-                />
-              </svg>
-              <span className="text-sm font-medium">Export</span>
-            </button>
-          </div>
+          {!hidePrinterBody && (
+            <div className="flex justify-end px-6 py-6">
+              <button
+                onClick={handleExportImage}
+                className="flex items-center gap-2  text-gray-700  p-1 rounded-xl hover:bg-gray-200 transition-colors"
+                aria-label="Export as Image"
+              >
+                <svg width="18" height="18" fill="none" viewBox="0 0 24 24">
+                  <path
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M12 17v-6m0 0-2 2m2-2 2 2M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7M12 3v8"
+                  />
+                </svg>
+                <span className="text-sm font-medium">Export</span>
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

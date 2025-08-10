@@ -10,6 +10,7 @@ type Item = {
   price: number;
   qty: number;
   shareWith: string[];
+  includeVat?: boolean; // เพิ่มตรงนี้
 };
 
 const STORAGE_KEY = process.env.NEXT_PUBLIC_STORAGE_KEY;
@@ -40,7 +41,12 @@ function SummaryPageContent() {
     if (initialItems.length === 0 && initialPersons.length === 0) {
       const itemsRaw = STORAGE_KEY ? localStorage.getItem(STORAGE_KEY) : null;
       const dividerRaw = DIVIDER_KEY ? localStorage.getItem(DIVIDER_KEY) : null;
-      if (itemsRaw) initialItems = JSON.parse(itemsRaw);
+      if (itemsRaw) {
+        initialItems = JSON.parse(itemsRaw).map((item: Item) => ({
+          ...item,
+          includeVat: item.includeVat ?? false, // fallback ถ้าไม่มี field นี้
+        }));
+      }
       if (dividerRaw) initialPersons = JSON.parse(dividerRaw);
     }
     setItems(initialItems);
