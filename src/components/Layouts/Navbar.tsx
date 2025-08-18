@@ -1,9 +1,6 @@
 "use client";
-<<<<<<< HEAD
+
 import React, { useEffect, useState, useCallback, useRef } from "react";
-=======
-import React, { useState } from "react";
->>>>>>> c4793d (rename Layouts_temp to Layouts)
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { navbarItems } from "@/constants/navbarItem";
@@ -13,7 +10,6 @@ import { motion, AnimatePresence } from "framer-motion";
 export default function Navbar() {
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-<<<<<<< HEAD
   const panelRef = useRef<HTMLDivElement | null>(null);
 
   const isActive = (path: string) => pathname === path;
@@ -26,14 +22,8 @@ export default function Navbar() {
   // Handle body scroll lock
   useEffect(() => {
     if (typeof document === "undefined") return;
-    
-    if (isMenuOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
 
-    // Cleanup function to restore scroll on unmount
+    document.body.style.overflow = isMenuOpen ? "hidden" : "";
     return () => {
       document.body.style.overflow = "";
     };
@@ -41,26 +31,18 @@ export default function Navbar() {
 
   // Handle escape key
   const onKeyDown = useCallback((e: KeyboardEvent) => {
-    if (e.key === "Escape") {
-      setIsMenuOpen(false);
-    }
+    if (e.key === "Escape") setIsMenuOpen(false);
   }, []);
-
   useEffect(() => {
-    if (isMenuOpen) {
-      document.addEventListener("keydown", onKeyDown);
-    }
-    
-    return () => {
-      document.removeEventListener("keydown", onKeyDown);
-    };
+    if (typeof window === "undefined") return;
+    if (isMenuOpen) window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
   }, [isMenuOpen, onKeyDown]);
 
   // Focus first link when menu opens (accessibility)
   useEffect(() => {
     if (!isMenuOpen || !panelRef.current) return;
-    
-    // Use setTimeout to ensure DOM is ready
+
     const timer = setTimeout(() => {
       const firstLink = panelRef.current?.querySelector<HTMLAnchorElement>("a");
       firstLink?.focus();
@@ -70,7 +52,7 @@ export default function Navbar() {
   }, [isMenuOpen]);
 
   return (
-    <nav className="sticky top-4 z-20  mx-auto w-full max-w-2xl px-4">
+    <nav className="sticky top-4 z-50 mx-auto w-full max-w-2xl px-4">
       <div className="backdrop-blur-xl border border-white/30 px-6 py-3 shadow-2xl rounded-2xl">
         <div className="flex h-14 items-center justify-between px-4 md:px-6">
           {/* Center: Desktop nav */}
@@ -105,59 +87,29 @@ export default function Navbar() {
             aria-label="Toggle menu"
             aria-expanded={isMenuOpen}
             aria-controls="mobile-menu"
-=======
-
-  return (
-    <nav className="border rounded-2xl mt-5 border-white/30 mx-auto max-w-2xl shadow-md flex py-4 justify-center backdrop-blur-xl shadow-2xl relative">
-      <div className="flex items-center justify-center px-6 py-3 w-full max-w-6xl">
-        <ul className="hidden md:flex items-center gap-x-8">
-          {navbarItems.map((item) => {
-            const isActive = pathname === item.path;
-            return (
-              <li key={item.path}>
-                <Link
-                  href={item.path}
-                  className={`font-medium transition-colors hover:text-white ${
-                    isActive ? "text-white font-bold" : "text-white/60"
-                  }`}
-                >
-                  {item.title}
-                  {isActive && (
-                    <span className="block mt-1 h-0.5 bg-white rounded-full" />
-                  )}
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-        <div className="md:hidden">
-          <button
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="p-2 rounded-md text-white/80 hover:bg-white/10"
-            aria-label="Toggle menu"
->>>>>>> c47b93d (rename Layouts_temp to Layouts)
           >
             {isMenuOpen ? <X /> : <Menu />}
           </button>
         </div>
-<<<<<<< HEAD
 
-        {/* Click-outside backdrop */}
+        {/* Click-outside backdrop (transparent; no visual tint) */}
         <AnimatePresence>
           {isMenuOpen && (
-            <motion.div
+            <motion.button
+              type="button"
+              aria-hidden="true"
+              onClick={() => setIsMenuOpen(false)}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[-1] md:hidden"
-              onClick={() => setIsMenuOpen(false)}
+              className="fixed inset-0 md:hidden cursor-default"
               style={{ WebkitTapHighlightColor: "transparent" }}
             />
           )}
         </AnimatePresence>
 
         {/* Mobile menu */}
-        <AnimatePresence mode="wait">
+        <AnimatePresence initial={false}>
           {isMenuOpen && (
             <motion.div
               id="mobile-menu"
@@ -168,7 +120,7 @@ export default function Navbar() {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.2, ease: "easeInOut" }}
+              transition={{ duration: 0.2 }}
               className="md:hidden overflow-hidden border-t border-white/15"
             >
               <div className="max-h-[60vh] overflow-auto px-2 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2">
@@ -196,37 +148,3 @@ export default function Navbar() {
     </nav>
   );
 }
-=======
-      </div>
-      <AnimatePresence>
-        {isMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            className="md:hidden overflow-hidden"
-          >
-            <ul className="flex flex-col px-6 pb-6 pt-2">
-              {navbarItems.map((item) => (
-                <li key={item.path}>
-                  <Link
-                    href={item.path}
-                    onClick={() => setIsMenuOpen(false)}
-                    className={`block py-3 text-center font-semibold transition-colors rounded-md ${
-                      pathname === item.path
-                        ? "text-blue-400 bg-white/5"
-                        : "text-white/80 hover:bg-white/10"
-                    }`}
-                  >
-                    {item.title}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </nav>
-  );
-}
->>>>>>> c47b93d (rename Layouts_temp to Layouts)
