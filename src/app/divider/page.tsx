@@ -6,8 +6,8 @@ import { Item } from "@/controllers/ListItem.controller";
 import BadgeDivider from "@/components/BadgeDivider";
 import ShowDetailCard from "@/components/Divider/ShowDetailCard";
 
-const DIVIDER_KEY = process.env.NEXT_PUBLIC_DIVIDER_KEY || "DIVIDER_PERSONS";
-const STORAGE_KEY = process.env.NEXT_PUBLIC_STORAGE_KEY || "CHECKBILL_ITEMS";
+const DIVIDER_KEY = process.env.NEXT_PUBLIC_DIVIDER_KEY ;
+const STORAGE_KEY = process.env.NEXT_PUBLIC_STORAGE_KEY;
 const VAT_RATE = 0.07; // 7%
 
 export default function DividerPage() {
@@ -23,6 +23,7 @@ export default function DividerPage() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
+    if (!DIVIDER_KEY) return;
     const saved = localStorage.getItem(DIVIDER_KEY);
     if (saved) setPersons(JSON.parse(saved));
     setIsLoaded(true);
@@ -31,6 +32,7 @@ export default function DividerPage() {
   useEffect(() => {
     // ดึงรายการอาหารทั้งหมดและคำนวณยอดจ่ายแต่ละคน (รวม VAT เฉพาะเมนูที่เลือก)
     if (typeof window === "undefined") return;
+    if (!STORAGE_KEY) return;
     const itemsRaw = localStorage.getItem(STORAGE_KEY);
     if (itemsRaw) {
       try {
@@ -64,11 +66,13 @@ export default function DividerPage() {
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (!isLoaded) return;
+    if (!DIVIDER_KEY) return;
     localStorage.setItem(DIVIDER_KEY, JSON.stringify(persons));
   }, [persons, isLoaded]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
+    if (!STORAGE_KEY) return;
     const itemsRaw = localStorage.getItem(STORAGE_KEY);
     if (itemsRaw) {
       try {

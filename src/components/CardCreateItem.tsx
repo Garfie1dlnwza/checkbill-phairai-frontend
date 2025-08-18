@@ -140,6 +140,7 @@ export default function CardCreateItem({
     setInputDivider("");
     setDividerError("");
     if (typeof window !== "undefined") {
+      if (!DIVIDER_KEY) return;
       localStorage.setItem(DIVIDER_KEY, JSON.stringify(updated));
     }
   };

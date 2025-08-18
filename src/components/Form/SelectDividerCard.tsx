@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-const DIVIDER_KEY = process.env.NEXT_PUBLIC_DIVIDER_KEY || "DIVIDER_PERSONS";
+const DIVIDER_KEY = process.env.NEXT_PUBLIC_DIVIDER_KEY ;
 
 interface SelectDividerCardProps {
   selected: string[];
