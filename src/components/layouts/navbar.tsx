@@ -13,37 +13,59 @@ export default function Navbar() {
 
   const isActive = (path: string) => pathname === path;
 
+  // Close menu when pathname changes
   useEffect(() => {
     setIsMenuOpen(false);
   }, [pathname]);
 
-
+  // Handle body scroll lock
   useEffect(() => {
     if (typeof document === "undefined") return;
-    document.body.style.overflow = isMenuOpen ? "hidden" : "";
+    
+    if (isMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+
+    // Cleanup function to restore scroll on unmount
     return () => {
       document.body.style.overflow = "";
     };
   }, [isMenuOpen]);
 
+  // Handle escape key
   const onKeyDown = useCallback((e: KeyboardEvent) => {
-    if (e.key === "Escape") setIsMenuOpen(false);
+    if (e.key === "Escape") {
+      setIsMenuOpen(false);
+    }
   }, []);
+
   useEffect(() => {
-    if (isMenuOpen) window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
+    if (isMenuOpen) {
+      document.addEventListener("keydown", onKeyDown);
+    }
+    
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+    };
   }, [isMenuOpen, onKeyDown]);
 
   // Focus first link when menu opens (accessibility)
   useEffect(() => {
-    if (!isMenuOpen) return;
-    const firstLink = panelRef.current?.querySelector<HTMLAnchorElement>("a");
-    firstLink?.focus();
+    if (!isMenuOpen || !panelRef.current) return;
+    
+    // Use setTimeout to ensure DOM is ready
+    const timer = setTimeout(() => {
+      const firstLink = panelRef.current?.querySelector<HTMLAnchorElement>("a");
+      firstLink?.focus();
+    }, 100);
+
+    return () => clearTimeout(timer);
   }, [isMenuOpen]);
 
   return (
-    
-    <nav className="sticky top-4 z-30 mx-auto w-full max-w-2xl px-4 ">
+    <nav className="sticky top-4 z-20  mx-auto w-full max-w-2xl px-4">
       <div className="backdrop-blur-xl border border-white/30 px-6 py-3 shadow-2xl rounded-2xl">
         <div className="flex h-14 items-center justify-between px-4 md:px-6">
           {/* Center: Desktop nav */}
@@ -71,7 +93,7 @@ export default function Navbar() {
             ))}
           </ul>
 
-          {/* Right: Mobile toggle (same look/colors) */}
+          {/* Right: Mobile toggle */}
           <button
             onClick={() => setIsMenuOpen((v) => !v)}
             className="md:hidden inline-flex items-center justify-center rounded-xl p-2 text-white/90 hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
@@ -83,24 +105,22 @@ export default function Navbar() {
           </button>
         </div>
 
-        {/* Click-outside backdrop (transparent; no visual tint) */}
+        {/* Click-outside backdrop */}
         <AnimatePresence>
           {isMenuOpen && (
-            <motion.button
-              type="button"
-              aria-hidden="true"
-              onClick={() => setIsMenuOpen(false)}
+            <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 md:hidden cursor-default"
+              className="fixed inset-0 z-[-1] md:hidden"
+              onClick={() => setIsMenuOpen(false)}
               style={{ WebkitTapHighlightColor: "transparent" }}
             />
           )}
         </AnimatePresence>
 
         {/* Mobile menu */}
-        <AnimatePresence initial={false}>
+        <AnimatePresence mode="wait">
           {isMenuOpen && (
             <motion.div
               id="mobile-menu"
@@ -111,7 +131,7 @@ export default function Navbar() {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.2 }}
+              transition={{ duration: 0.2, ease: "easeInOut" }}
               className="md:hidden overflow-hidden border-t border-white/15"
             >
               <div className="max-h-[60vh] overflow-auto px-2 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2">
