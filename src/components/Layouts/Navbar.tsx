@@ -31,8 +31,11 @@ export default function Navbar() {
 
   // Handle escape key
   const onKeyDown = useCallback((e: KeyboardEvent) => {
-    if (e.key === "Escape") setIsMenuOpen(false);
+    if (e.key === "Escape") {
+      setIsMenuOpen(false);
+    }
   }, []);
+
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (isMenuOpen) window.addEventListener("keydown", onKeyDown);
@@ -42,7 +45,6 @@ export default function Navbar() {
   // Focus first link when menu opens (accessibility)
   useEffect(() => {
     if (!isMenuOpen || !panelRef.current) return;
-
     const timer = setTimeout(() => {
       const firstLink = panelRef.current?.querySelector<HTMLAnchorElement>("a");
       firstLink?.focus();
@@ -52,8 +54,7 @@ export default function Navbar() {
   }, [isMenuOpen]);
 
   return (
-    
-    <nav className="sticky top-4 z-30 mx-auto w-full max-w-2xl px-4 ">
+    <nav className="sticky top-4 z-20  mx-auto w-full max-w-2xl px-4">
       <div className="backdrop-blur-xl border border-white/30 px-6 py-3 shadow-2xl rounded-2xl">
         <div className="flex h-14 items-center justify-between px-4 md:px-6">
           {/* Center: Desktop nav */}
@@ -93,24 +94,22 @@ export default function Navbar() {
           </button>
         </div>
 
-        {/* Click-outside backdrop (transparent; no visual tint) */}
+        {/* Click-outside backdrop */}
         <AnimatePresence>
           {isMenuOpen && (
-            <motion.button
-              type="button"
-              aria-hidden="true"
-              onClick={() => setIsMenuOpen(false)}
+            <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 md:hidden cursor-default"
+              className="fixed inset-0 z-[-1] md:hidden"
+              onClick={() => setIsMenuOpen(false)}
               style={{ WebkitTapHighlightColor: "transparent" }}
             />
           )}
         </AnimatePresence>
 
         {/* Mobile menu */}
-        <AnimatePresence initial={false}>
+        <AnimatePresence mode="wait">
           {isMenuOpen && (
             <motion.div
               id="mobile-menu"
@@ -121,7 +120,7 @@ export default function Navbar() {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.2 }}
+              transition={{ duration: 0.2, ease: "easeInOut" }}
               className="md:hidden overflow-hidden border-t border-white/15"
             >
               <div className="max-h-[60vh] overflow-auto px-2 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2">

@@ -6,6 +6,7 @@ import { getColor } from "@/constants/color";
 import CheckBox from "@/components/Custom/CheckBox";
 
 const DIVIDER_KEY = process.env.NEXT_PUBLIC_DIVIDER_KEY;
+const DIVIDER_KEY = process.env.NEXT_PUBLIC_DIVIDER_KEY;
 
 interface CardCreateItemProps {
   onSave: (item: {
@@ -116,7 +117,6 @@ export default function CardCreateItem({
     Number(qty) > 0 &&
     !isNaN(Number(price)) &&
     Number(price) >= 0;
-
 
   const VAT_RATE = 0.07;
   const totalAmount = (Number(qty) || 0) * (Number(price) || 0);
