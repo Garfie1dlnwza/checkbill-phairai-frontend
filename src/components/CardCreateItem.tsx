@@ -117,6 +117,7 @@ export default function CardCreateItem({
     !isNaN(Number(price)) &&
     Number(price) >= 0;
 
+
   const VAT_RATE = 0.07;
   const totalAmount = (Number(qty) || 0) * (Number(price) || 0);
   const vatAmount = includeVat ? totalAmount * VAT_RATE : 0;
