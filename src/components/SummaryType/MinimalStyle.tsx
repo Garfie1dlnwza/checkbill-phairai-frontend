@@ -1,6 +1,7 @@
 "use client";
 import { toPng } from "html-to-image";
 import { useEffect, useState } from "react";
+import { Download } from "lucide-react";
 
 type Item = {
   id: string;
@@ -22,18 +23,16 @@ export default function MinimalReceipt({
   persons,
   printMode,
 }: MinimalReceiptProps) {
-  const [personAmounts, setPersonAmounts] = useState<Record<string, number>>(
-    {}
-  );
+  const [personAmounts, setPersonAmounts] = useState<Record<string, number>>({});
   const [totalBill, setTotalBill] = useState<number>(0);
   const [totalVat, setTotalVat] = useState<number>(0);
   const [hidePrinterBody, setHidePrinterBody] = useState(false);
   const [isPrinting, setIsPrinting] = useState(printMode);
-  const [printedSections, setPrintedSections] = useState<Set<string>>(
-    new Set()
-  );
+  const [printedSections, setPrintedSections] = useState<Set<string>>(new Set());
   const [currentPrintLine, setCurrentPrintLine] = useState(0);
   const [showCutter, setShowCutter] = useState(false);
+  const [isFullyRendered, setIsFullyRendered] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
 
   const VAT_RATE = 0.07;
 
@@ -63,7 +62,11 @@ export default function MinimalReceipt({
   }, [items, persons]);
 
   useEffect(() => {
-    if (!isPrinting) return;
+    if (!isPrinting) {
+      // ถ้าไม่มี animation ให้ถือว่า render เสร็จแล้ว
+      setIsFullyRendered(true);
+      return;
+    }
 
     const sections = [
       "header",
@@ -78,6 +81,7 @@ export default function MinimalReceipt({
     const printInterval = setInterval(() => {
       if (currentSection >= sections.length) {
         setIsPrinting(false);
+        setIsFullyRendered(true); // Animation เสร็จแล้ว
         setTimeout(() => setShowCutter(true), 500);
         setTimeout(() => setShowCutter(false), 1500);
         clearInterval(printInterval);
@@ -121,30 +125,61 @@ export default function MinimalReceipt({
   };
 
   const handleExportImage = async () => {
+    if (!isFullyRendered || isExporting) {
+      alert("กรุณารอให้แสดงผลเสร็จก่อนทำการ Export");
+      return;
+    }
+
+    setIsExporting(true);
     setHidePrinterBody(true);
+    
+    // รอให้ DOM update
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
     const node = document.getElementById("receipt-container");
-    if (!node) return;
+    if (!node) {
+      setIsExporting(false);
+      setHidePrinterBody(false);
+      return;
+    }
+
     try {
       const dataUrl = await toPng(node, {
         cacheBust: true,
         backgroundColor: "#fff",
+        width: node.offsetWidth,
+        height: node.offsetHeight,
+        style: {
+          transform: 'scale(1)',
+          transformOrigin: 'top left',
+        },
+        filter: (node) => {
+          // ซ่อน animation elements ขณะ export
+          if (node.className && typeof node.className === 'string') {
+            return !node.className.includes('animate-pulse');
+          }
+          return true;
+        }
       });
+      
       const link = document.createElement("a");
-      link.download = "receipt.png";
+      link.download = `receipt-${new Date().getTime()}.png`;
       link.href = dataUrl;
       link.click();
     } catch (err) {
-      alert("Export failed");
+      console.error('Export error:', err);
+      alert("Export failed. Please try again.");
     } finally {
       setHidePrinterBody(false);
+      setIsExporting(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex justify-center items-start py-8 px-4 text-gray-700 ">
-      <div id="receipt-container" className="relative w-full min-w-lg max-w-lg">
+    <div className="min-h-screen flex justify-center items-start py-4 sm:py-8 px-2 sm:px-4 text-gray-700">
+      <div id="receipt-container" className="relative w-full max-w-sm sm:max-w-md lg:max-w-lg">
         {/* Receipt Container */}
-        <div className=" w-full min-w-lg max-w-lg bg-white shadow-2xl relative overflow-hidden">
+        <div className="w-full bg-white shadow-2xl relative overflow-hidden rounded-lg sm:rounded-none">
           {isPrinting && (
             <div
               className="absolute left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-blue-500 to-transparent animate-pulse z-10"
@@ -152,35 +187,35 @@ export default function MinimalReceipt({
                 top: `${Math.min(currentPrintLine * 25, 400)}px`,
                 transition: "top 0.3s ease-out",
               }}
-            ></div>
+            />
           )}
 
-          {/* Perforated Top Edge */}
-          <div className="h-4 bg-white relative  overflow-hidden ">
+          {/* Perforated Top Edge - Hidden on mobile */}
+          <div className="hidden sm:block h-4 bg-white relative overflow-hidden">
             <div
-              className="absolute top-0 left-0 w-full h-4 bg-gray-100 "
+              className="absolute top-0 left-0 w-full h-4 bg-gray-100"
               style={{
                 backgroundImage: `repeating-linear-gradient(90deg, transparent, transparent 8px, white 8px, white 12px)`,
               }}
-            ></div>
+            />
           </div>
 
-          <div className="px-6 pb-6 font-mono text-sm bg-white ">
+          <div className="px-4 sm:px-6 pb-4 sm:pb-6 font-mono text-xs sm:text-sm bg-white">
             {/* Header */}
             <div
-              className={`text-center py-4 border-b border-dashed border-gray-400 text-gray-700 transition-opacity duration-300 ${
+              className={`text-center py-3 sm:py-4 border-b border-dashed border-gray-400 text-gray-700 transition-opacity duration-300 ${
                 isSectionVisible("header", 0) ? "opacity-100" : "opacity-0"
               }`}
             >
               <h1
-                className={`text-lg font-bold mb-1 transition-opacity duration-500 ${
+                className={`text-base sm:text-lg font-bold mb-1 transition-opacity duration-500 ${
                   isSectionVisible("header", 0) ? "opacity-100" : "opacity-0"
                 }`}
               >
                 ใบเสร็จรับเงิน
               </h1>
               <h2
-                className={`text-base font-semibold transition-opacity duration-500 delay-100 ${
+                className={`text-sm sm:text-base font-semibold transition-opacity duration-500 delay-100 ${
                   isSectionVisible("header", 1) ? "opacity-100" : "opacity-0"
                 }`}
               >
@@ -196,7 +231,7 @@ export default function MinimalReceipt({
             </div>
 
             {/* Items */}
-            <div className="py-4 space-y-2">
+            <div className="py-3 sm:py-4 space-y-2 sm:space-y-3">
               {items.map((item, index) => (
                 <div
                   key={item.id}
@@ -206,9 +241,9 @@ export default function MinimalReceipt({
                       : "opacity-0 translate-y-2"
                   }`}
                 >
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <div className="font-semibold">{item.name}</div>
+                  <div className="flex justify-between items-start gap-2">
+                    <div className="flex-1 min-w-0">
+                      <div className="font-semibold text-xs sm:text-sm truncate">{item.name}</div>
                       <div
                         className={`text-xs text-gray-600 transition-opacity duration-300 delay-100 ${
                           isSectionVisible(`item-${item.id}`, 1)
@@ -226,12 +261,14 @@ export default function MinimalReceipt({
                               : "opacity-0"
                           }`}
                         >
-                          หาร: {item.shareWith.join(", ")}
+                          <span className="hidden sm:inline">หาร: </span>
+                          <span className="sm:hidden">หาร:</span>
+                          <span className="break-words">{item.shareWith.join(", ")}</span>
                         </div>
                       )}
                     </div>
                     <div
-                      className={`font-bold text-right ml-4 transition-opacity duration-300 delay-100 ${
+                      className={`font-bold text-right ml-2 flex-shrink-0 text-xs sm:text-sm transition-opacity duration-300 delay-100 ${
                         isSectionVisible(`item-${item.id}`, 1)
                           ? "opacity-100"
                           : "opacity-0"
@@ -241,7 +278,7 @@ export default function MinimalReceipt({
                     </div>
                   </div>
                   {index < items.length - 1 && (
-                    <div className="border-b border-dotted border-gray-300 mt-2"></div>
+                    <div className="border-b border-dotted border-gray-300 mt-2" />
                   )}
                 </div>
               ))}
@@ -255,11 +292,11 @@ export default function MinimalReceipt({
                   : "opacity-0 translate-y-2"
               }`}
             >
-              <div className="flex justify-between text-base font-bold">
+              <div className="flex justify-between text-sm sm:text-base font-bold">
                 <span>TOTAL</span>
                 <span>฿{totalBill.toLocaleString()}</span>
               </div>
-              <div className="flex justify-between text-sm text-gray-600 mt-1">
+              <div className="flex justify-between text-xs sm:text-sm text-gray-600 mt-1">
                 <span>VAT 7%</span>
                 <span>
                   ฿
@@ -268,7 +305,7 @@ export default function MinimalReceipt({
                   })}
                 </span>
               </div>
-              <div className="flex justify-between text-base font-bold mt-1">
+              <div className="flex justify-between text-sm sm:text-base font-bold mt-1">
                 <span>รวมทั้งหมด</span>
                 <span>
                   ฿
@@ -281,28 +318,28 @@ export default function MinimalReceipt({
 
             {/* Divider */}
             <div
-              className={`border-t border-dashed border-gray-400 mt-6 pt-4 transition-all duration-500 ${
+              className={`border-t border-dashed border-gray-400 mt-4 sm:mt-6 pt-3 sm:pt-4 transition-all duration-500 ${
                 isSectionVisible("divider", 0)
                   ? "opacity-100 translate-y-0"
                   : "opacity-0 translate-y-2"
               }`}
             >
-              <h3 className="text-center font-bold mb-3">
+              <h3 className="text-center font-bold mb-3 text-xs sm:text-sm">
                 ยอดแยกตามคน (รวม VAT)
               </h3>
-              <div className="space-y-2">
+              <div className="space-y-1 sm:space-y-2">
                 {persons.map((name, index) => (
                   <div
                     key={name}
-                    className={`flex justify-between transition-all duration-300 ${
+                    className={`flex justify-between items-center transition-all duration-300 ${
                       isSectionVisible("divider", index + 1)
                         ? "opacity-100 translate-x-0"
                         : "opacity-0 -translate-x-4"
                     }`}
                     style={{ transitionDelay: `${index * 100}ms` }}
                   >
-                    <span>{name}</span>
-                    <span className="font-semibold">
+                    <span className="text-xs sm:text-sm truncate flex-1">{name}</span>
+                    <span className="font-semibold text-xs sm:text-sm ml-2 flex-shrink-0">
                       ฿{personAmounts[name]?.toFixed(2) || "0.00"}
                     </span>
                   </div>
@@ -312,7 +349,7 @@ export default function MinimalReceipt({
 
             {/* Footer */}
             <div
-              className={`text-center text-xs text-gray-500 mt-6 pt-4 border-t border-dotted border-gray-300 transition-all duration-500 ${
+              className={`text-center text-xs text-gray-500 mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-dotted border-gray-300 transition-all duration-500 ${
                 isSectionVisible("footer", 0)
                   ? "opacity-100 translate-y-0"
                   : "opacity-0 translate-y-2"
@@ -335,26 +372,33 @@ export default function MinimalReceipt({
             </div>
           </div>
 
+          {/* Perforated Bottom Edge - Hidden on mobile */}
           {!hidePrinterBody && (
-            <div className="h-4 bg-white relative overflow-hidden">
+            <div className="hidden sm:block h-4 bg-white relative overflow-hidden">
               <div
                 className="absolute bottom-0 left-0 w-full h-4 bg-gray-100"
                 style={{
                   backgroundImage: `repeating-linear-gradient(90deg, transparent, transparent 8px, white 8px, white 12px)`,
                 }}
-              ></div>
+              />
             </div>
           )}
 
-          {/* ปุ่ม export ในใบเสร็จ */}
+          {/* Export Button */}
           {!hidePrinterBody && (
-            <div className="flex justify-end px-6 py-6">
+            <div className="flex justify-center px-4 sm:px-6 py-3 sm:py-6 bg-gray-50 sm:bg-white">
               <button
                 onClick={handleExportImage}
-                className="flex items-center gap-2  text-gray-700  p-1 rounded-xl hover:bg-gray-200 transition-colors"
+                disabled={!isFullyRendered || isExporting}
+                className={`flex items-center gap-2 text-gray-700 bg-white sm:bg-transparent border border-gray-300 sm:border-0 px-4 py-2 sm:p-1 rounded-xl transition-colors shadow-sm sm:shadow-none w-full sm:w-auto justify-center ${
+                  !isFullyRendered || isExporting 
+                    ? 'opacity-50 cursor-not-allowed' 
+                    : 'hover:bg-gray-100 sm:hover:bg-gray-200'
+                }`}
                 aria-label="Export as Image"
               >
-                <svg width="18" height="18" fill="none" viewBox="0 0 24 24">
+                <Download size={16} className={`sm:hidden ${isExporting ? 'animate-spin' : ''}`} />
+                <svg className="hidden sm:block" width="18" height="18" fill="none" viewBox="0 0 24 24">
                   <path
                     stroke="currentColor"
                     strokeWidth="2"
@@ -363,7 +407,9 @@ export default function MinimalReceipt({
                     d="M12 17v-6m0 0-2 2m2-2 2 2M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7M12 3v8"
                   />
                 </svg>
-                <span className="text-sm font-medium">Export</span>
+                <span className="text-sm font-medium">
+                  {isExporting ? 'Exporting...' : !isFullyRendered ? 'Loading...' : 'Export'}
+                </span>
               </button>
             </div>
           )}
