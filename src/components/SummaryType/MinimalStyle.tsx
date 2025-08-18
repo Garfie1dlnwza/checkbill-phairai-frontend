@@ -372,7 +372,18 @@ export default function MinimalReceipt({
             </div>
           </div>
 
-          {/* Perforated Bottom Edge - Hidden on mobile */}
+          {!hidePrinterBody && (
+            <div className="h-4 bg-white relative overflow-hidden">
+              <div
+                className="absolute bottom-0 left-0 w-full h-4 bg-gray-100"
+                style={{
+                  backgroundImage: `repeating-linear-gradient(90deg, transparent, transparent 8px, white 8px, white 12px)`,
+                }}
+              ></div>
+            </div>
+          )}
+
+          {/* ปุ่ม export ในใบเสร็จ */}
           {!hidePrinterBody && (
             <div className="hidden sm:block h-4 bg-white relative overflow-hidden">
               <div
