@@ -6,7 +6,6 @@ import { getColor } from "@/constants/color";
 import CheckBox from "@/components/Custom/CheckBox";
 
 const DIVIDER_KEY = process.env.NEXT_PUBLIC_DIVIDER_KEY;
-const DIVIDER_KEY = process.env.NEXT_PUBLIC_DIVIDER_KEY;
 
 interface CardCreateItemProps {
   onSave: (item: {
