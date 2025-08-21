@@ -17,14 +17,28 @@ type Item = {
   shareWith: string[];
 };
 
+type PaymentInfo = {
+  type: "qr" | "bank" | "none";
+  qrCodeUrl?: string;
+  bankName?: string;
+  accountNumber?: string;
+  accountName?: string;
+};
+
 interface ColorStyleProps {
   items?: Item[];
   persons?: string[];
+  paymentInfo?: PaymentInfo;
   includeVat?: boolean;
   printMode?: boolean;
 }
 
-export default function ColorStyle({ items: propItems, persons: propPersons, printMode }: ColorStyleProps) {
+export default function ColorStyle({ 
+  items: propItems, 
+  persons: propPersons, 
+  paymentInfo = { type: "none" },
+  printMode 
+}: ColorStyleProps) {
   const [items, setItems] = useState<Item[]>(propItems || []);
   const [persons, setPersons] = useState<string[]>(propPersons || []);
   const [personAmounts, setPersonAmounts] = useState<Record<string, number>>({});
@@ -77,7 +91,6 @@ export default function ColorStyle({ items: propItems, persons: propPersons, pri
   // Animation print effect
   useEffect(() => {
     if (!isPrinting) {
-      // ถ้าไม่มี animation ให้ถือว่า render เสร็จแล้ว
       setIsFullyRendered(true);
       return;
     }
@@ -87,6 +100,7 @@ export default function ColorStyle({ items: propItems, persons: propPersons, pri
       ...items.map((item) => `item-${item.id}`),
       "total",
       "divider",
+      ...(paymentInfo.type !== "none" ? ["payment"] : []),
       "footer",
     ];
     let currentSection = 0;
@@ -95,7 +109,7 @@ export default function ColorStyle({ items: propItems, persons: propPersons, pri
     const printInterval = setInterval(() => {
       if (currentSection >= sections.length) {
         setIsPrinting(false);
-        setIsFullyRendered(true); // Animation เสร็จแล้ว
+        setIsFullyRendered(true);
         setTimeout(() => setShowCutter(true), 500);
         setTimeout(() => setShowCutter(false), 1500);
         clearInterval(printInterval);
@@ -114,6 +128,8 @@ export default function ColorStyle({ items: propItems, persons: propPersons, pri
         ? 3
         : sectionName === "divider"
         ? persons.length + 1
+        : sectionName === "payment"
+        ? paymentInfo.type === "bank" ? 3 : 1
         : 2;
 
       lineInSection++;
@@ -124,7 +140,7 @@ export default function ColorStyle({ items: propItems, persons: propPersons, pri
     }, 100);
 
     return () => clearInterval(printInterval);
-  }, [items.length, persons.length, isPrinting]);
+  }, [items.length, persons.length, isPrinting, paymentInfo]);
 
   const isSectionVisible = (sectionName: string, lineIndex: number = 0) => {
     return !isPrinting || printedSections.has(`${sectionName}-${lineIndex}`);
@@ -139,7 +155,6 @@ export default function ColorStyle({ items: propItems, persons: propPersons, pri
 
     setIsExporting(true);
     
-    // รอให้ DOM update
     await new Promise(resolve => setTimeout(resolve, 100));
     
     const node = document.getElementById("color-style-receipt");
@@ -159,7 +174,6 @@ export default function ColorStyle({ items: propItems, persons: propPersons, pri
           transformOrigin: 'top left',
         },
         filter: (node) => {
-          // ซ่อน animation elements ขณะ export
           if (node.className && typeof node.className === 'string') {
             return !node.className.includes('animate-pulse');
           }
@@ -361,6 +375,68 @@ export default function ColorStyle({ items: propItems, persons: propPersons, pri
             ))}
           </div>
         </div>
+
+        {/* Payment Information */}
+        {paymentInfo.type !== "none" && (
+          <div
+            className={`space-y-3 sm:space-y-4 border-t border-dashed border-neutral-300 mt-4 sm:mt-6 lg:mt-8 pt-4 sm:pt-6 transition-all duration-500 ${
+              isSectionVisible("payment", 0)
+                ? "opacity-100 translate-y-0"
+                : "opacity-0 translate-y-2"
+            }`}
+          >
+            <h2 className="text-base sm:text-lg lg:text-xl font-semibold text-center mb-3 sm:mb-4">
+              ข้อมูลการชำระเงิน
+            </h2>
+            {paymentInfo.type === "qr" && paymentInfo.qrCodeUrl && (
+              <div className="text-center">
+                <img
+                  src={paymentInfo.qrCodeUrl}
+                  alt="QR Code สำหรับชำระเงิน"
+                  className="mx-auto max-w-24 sm:max-w-32 lg:max-w-40 h-auto border border-neutral-200 rounded-lg"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                  }}
+                />
+                <p className="text-xs sm:text-sm text-neutral-500 mt-2">สแกน QR Code เพื่อชำระเงิน</p>
+              </div>
+            )}
+            {paymentInfo.type === "bank" && (
+              <div className="bg-neutral-50 rounded-lg p-3 sm:p-4 space-y-2">
+                {paymentInfo.bankName && (
+                  <div
+                    className={`flex justify-between items-center text-sm sm:text-base transition-opacity duration-300 ${
+                      isSectionVisible("payment", 0) ? "opacity-100" : "opacity-0"
+                    }`}
+                  >
+                    <span className="text-neutral-600">ธนาคาร:</span>
+                    <span className="font-semibold">{paymentInfo.bankName}</span>
+                  </div>
+                )}
+                {paymentInfo.accountNumber && (
+                  <div
+                    className={`flex justify-between items-center text-sm sm:text-base transition-opacity duration-300 delay-100 ${
+                      isSectionVisible("payment", 1) ? "opacity-100" : "opacity-0"
+                    }`}
+                  >
+                    <span className="text-neutral-600">เลขบัญชี:</span>
+                    <span className="font-mono font-semibold">{paymentInfo.accountNumber}</span>
+                  </div>
+                )}
+                {paymentInfo.accountName && (
+                  <div
+                    className={`flex justify-between items-center text-sm sm:text-base transition-opacity duration-300 delay-200 ${
+                      isSectionVisible("payment", 2) ? "opacity-100" : "opacity-0"
+                    }`}
+                  >
+                    <span className="text-neutral-600">ชื่อบัญชี:</span>
+                    <span className="font-semibold">{paymentInfo.accountName}</span>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Footer */}
         <div

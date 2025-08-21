@@ -12,15 +12,25 @@ type Item = {
   includeVat?: boolean;
 };
 
+type PaymentInfo = {
+  type: "qr" | "bank" | "none";
+  qrCodeUrl?: string;
+  bankName?: string;
+  accountNumber?: string;
+  accountName?: string;
+};
+
 interface MinimalReceiptProps {
   items: Item[];
   persons: string[];
+  paymentInfo?: PaymentInfo;
   printMode?: boolean;
 }
 
 export default function MinimalReceipt({
   items,
   persons,
+  paymentInfo = { type: "none" },
   printMode,
 }: MinimalReceiptProps) {
   const [personAmounts, setPersonAmounts] = useState<Record<string, number>>({});
@@ -63,7 +73,6 @@ export default function MinimalReceipt({
 
   useEffect(() => {
     if (!isPrinting) {
-      // ถ้าไม่มี animation ให้ถือว่า render เสร็จแล้ว
       setIsFullyRendered(true);
       return;
     }
@@ -73,6 +82,7 @@ export default function MinimalReceipt({
       ...items.map((item) => `item-${item.id}`),
       "total",
       "divider",
+      ...(paymentInfo.type !== "none" ? ["payment"] : []),
       "footer",
     ];
     let currentSection = 0;
@@ -81,7 +91,7 @@ export default function MinimalReceipt({
     const printInterval = setInterval(() => {
       if (currentSection >= sections.length) {
         setIsPrinting(false);
-        setIsFullyRendered(true); // Animation เสร็จแล้ว
+        setIsFullyRendered(true);
         setTimeout(() => setShowCutter(true), 500);
         setTimeout(() => setShowCutter(false), 1500);
         clearInterval(printInterval);
@@ -100,6 +110,8 @@ export default function MinimalReceipt({
         ? 3
         : sectionName === "divider"
         ? persons.length + 1
+        : sectionName === "payment"
+        ? paymentInfo.type === "bank" ? 3 : 1
         : 2;
 
       lineInSection++;
@@ -110,7 +122,7 @@ export default function MinimalReceipt({
     }, 100);
 
     return () => clearInterval(printInterval);
-  }, [items.length, persons.length, isPrinting]);
+  }, [items.length, persons.length, isPrinting, paymentInfo]);
 
   const currentDate = new Date().toLocaleDateString("th-TH", {
     year: "numeric",
@@ -133,7 +145,6 @@ export default function MinimalReceipt({
     setIsExporting(true);
     setHidePrinterBody(true);
     
-    // รอให้ DOM update
     await new Promise(resolve => setTimeout(resolve, 100));
     
     const node = document.getElementById("receipt-container");
@@ -154,7 +165,6 @@ export default function MinimalReceipt({
           transformOrigin: 'top left',
         },
         filter: (node) => {
-          // ซ่อน animation elements ขณะ export
           if (node.className && typeof node.className === 'string') {
             return !node.className.includes('animate-pulse');
           }
@@ -178,7 +188,6 @@ export default function MinimalReceipt({
   return (
     <div className="min-h-screen flex justify-center items-start py-4 sm:py-8 px-2 sm:px-4 text-gray-700">
       <div id="receipt-container" className="relative w-full max-w-sm sm:max-w-md lg:max-w-lg">
-        {/* Receipt Container */}
         <div className="w-full bg-white shadow-2xl relative overflow-hidden rounded-lg sm:rounded-none">
           {isPrinting && (
             <div
@@ -190,7 +199,6 @@ export default function MinimalReceipt({
             />
           )}
 
-          {/* Perforated Top Edge - Hidden on mobile */}
           <div className="hidden sm:block h-4 bg-white relative overflow-hidden">
             <div
               className="absolute top-0 left-0 w-full h-4 bg-gray-100"
@@ -347,6 +355,68 @@ export default function MinimalReceipt({
               </div>
             </div>
 
+            {/* Payment Information */}
+            {paymentInfo.type !== "none" && (
+              <div
+                className={`border-t border-dashed border-gray-400 mt-4 sm:mt-6 pt-3 sm:pt-4 transition-all duration-500 ${
+                  isSectionVisible("payment", 0)
+                    ? "opacity-100 translate-y-0"
+                    : "opacity-0 translate-y-2"
+                }`}
+              >
+                <h3 className="text-center font-bold mb-3 text-xs sm:text-sm">
+                  ข้อมูลการชำระเงิน
+                </h3>
+                {paymentInfo.type === "qr" && paymentInfo.qrCodeUrl && (
+                  <div className="text-center">
+                    <img
+                      src={paymentInfo.qrCodeUrl}
+                      alt="QR Code สำหรับชำระเงิน"
+                      className="mx-auto max-w-24 sm:max-w-32 h-auto"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                    <p className="text-xs text-gray-500 mt-2">สแกน QR Code เพื่อชำระเงิน</p>
+                  </div>
+                )}
+                {paymentInfo.type === "bank" && (
+                  <div className="space-y-1">
+                    {paymentInfo.bankName && (
+                      <div
+                        className={`flex justify-between text-xs sm:text-sm transition-opacity duration-300 ${
+                          isSectionVisible("payment", 0) ? "opacity-100" : "opacity-0"
+                        }`}
+                      >
+                        <span>ธนาคาร:</span>
+                        <span>{paymentInfo.bankName}</span>
+                      </div>
+                    )}
+                    {paymentInfo.accountNumber && (
+                      <div
+                        className={`flex justify-between text-xs sm:text-sm transition-opacity duration-300 delay-100 ${
+                          isSectionVisible("payment", 1) ? "opacity-100" : "opacity-0"
+                        }`}
+                      >
+                        <span>เลขบัญชี:</span>
+                        <span className="font-mono">{paymentInfo.accountNumber}</span>
+                      </div>
+                    )}
+                    {paymentInfo.accountName && (
+                      <div
+                        className={`flex justify-between text-xs sm:text-sm transition-opacity duration-300 delay-200 ${
+                          isSectionVisible("payment", 2) ? "opacity-100" : "opacity-0"
+                        }`}
+                      >
+                        <span>ชื่อบัญชี:</span>
+                        <span>{paymentInfo.accountName}</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Footer */}
             <div
               className={`text-center text-xs text-gray-500 mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-dotted border-gray-300 transition-all duration-500 ${
@@ -383,7 +453,6 @@ export default function MinimalReceipt({
             </div>
           )}
 
-          {/* ปุ่ม export ในใบเสร็จ */}
           {!hidePrinterBody && (
             <div className="hidden sm:block h-4 bg-white relative overflow-hidden">
               <div

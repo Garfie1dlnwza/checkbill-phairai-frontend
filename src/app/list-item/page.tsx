@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
-import { Plus, Trash2, ShoppingCart, Edit2 } from "lucide-react";
+import { Plus, Trash2, ShoppingCart, Edit2, RotateCcw } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ListItemController, Item } from "@/controllers/ListItem.controller";
 import CardCreateItem from "@/components/CardCreateItem";
@@ -9,7 +9,7 @@ import BadgeDivider from "@/components/BadgeDivider";
 const STORAGE_KEY = process.env.NEXT_PUBLIC_STORAGE_KEY;
 const DIVIDER_KEY = process.env.NEXT_PUBLIC_DIVIDER_KEY;
 
-const VAT_RATE = 0.07; // 7%
+const VAT_RATE = 0.07;
 
 export default function ListItemPage() {
   const [rows, setRows] = useState<Item[]>([]);
@@ -147,6 +147,32 @@ export default function ListItemPage() {
       )
     );
     setEditRow(null);
+  };
+
+  // ฟังก์ชันล้างบิลทั้งหมด
+  const handleClearBill = () => {
+    const confirmed = window.confirm(
+      "คุณต้องการล้างข้อมูลบิลทั้งหมดใช่หรือไม่?\n\nข้อมูลที่จะถูกลบ:\n- รายการอาหารทั้งหมด\n- รายชื่อคนหาร\n- ข้อมูลการชำระเงิน\n\nการกระทำนี้ไม่สามารถย้อนกลับได้"
+    );
+    
+    if (confirmed) {
+      // ล้าง localStorage ทั้งหมดที่เกี่ยวข้อง
+      if (STORAGE_KEY) localStorage.removeItem(STORAGE_KEY);
+      if (DIVIDER_KEY) localStorage.removeItem(DIVIDER_KEY);
+      
+      // ล้างข้อมูลอื่นๆ ที่อาจเกี่ยวข้อง (เช่น payment info)
+      localStorage.removeItem('paymentInfo');
+      
+      // Reset state
+      setRows([]);
+      setPersonCount(0);
+      setDividerPersons([]);
+      setShowCreate(false);
+      setEditRow(null);
+      
+      // แจ้งเตือนเมื่อล้างเสร็จ
+      alert("ล้างข้อมูลบิลเรียบร้อยแล้ว");
+    }
   };
 
   if (!STORAGE_KEY) {
@@ -436,15 +462,26 @@ export default function ListItemPage() {
           )}
         </div>
 
-        {/* Add Button */}
-        <div className="flex justify-center gap-4 mt-4">
+        {/* Action Buttons */}
+        <div className="flex flex-col sm:flex-row justify-center gap-4 mt-4">
           <button
             onClick={() => setShowCreate(true)}
-            className="flex items-center gap-2 px-4 sm:px-6 py-3 rounded-xl bg-white text-black font-semibold shadow-lg hover:scale-105 transition-transform text-sm sm:text-base"
+            className="flex items-center justify-center gap-2 px-4 sm:px-6 py-3 rounded-xl bg-white text-black font-semibold shadow-lg hover:scale-105 transition-transform text-sm sm:text-base"
           >
             <Plus size={20} color="#000000" />
             เพิ่มรายการ
           </button>
+          
+          {/* Clear Bill Button */}
+          {(rows.length > 0 || personCount > 0) && (
+            <button
+              onClick={handleClearBill}
+              className="flex items-center justify-center gap-2 px-4 sm:px-6 py-3 rounded-xl bg-red-600 text-white font-semibold shadow-lg hover:scale-105 hover:bg-red-700 transition-all text-sm sm:text-base"
+            >
+              <RotateCcw size={20} />
+              ล้างบิลทั้งหมด
+            </button>
+          )}
         </div>
         
         {showCreate && (
