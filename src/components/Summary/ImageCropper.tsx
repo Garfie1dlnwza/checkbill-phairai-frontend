@@ -1,6 +1,6 @@
 "use client";
 import { useRef, useState, useCallback, useEffect } from "react";
-import { X, Crop, RotateCcw, Check, Loader2 } from "lucide-react";
+import { X, Crop, RotateCcw, Check, Loader2, Image } from "lucide-react";
 import { CropArea } from "@/types/summary";
 import { getEventCoordinates } from "@/utils/imageUtils";
 
@@ -8,12 +8,14 @@ interface ImageCropperProps {
   imageSrc: string;
   onCrop: (croppedImage: string) => void;
   onCancel: () => void;
+  onUseOriginal?: (originalImage: string) => void;
 }
 
 export default function ImageCropper({
   imageSrc,
   onCrop,
   onCancel,
+  onUseOriginal,
 }: ImageCropperProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
@@ -95,17 +97,8 @@ export default function ImageCropper({
     if (!image || !canvas) return;
 
     const handleImageLoad = () => {
-      // Optimize canvas size for better performance
-      const maxWidth = 1200;
-      const maxHeight = 1200;
-
-      let { naturalWidth: width, naturalHeight: height } = image;
-
-      if (width > maxWidth || height > maxHeight) {
-        const ratio = Math.min(maxWidth / width, maxHeight / height);
-        width *= ratio;
-        height *= ratio;
-      }
+      // ใช้ขนาดเต็มของภาพต้นฉบับ
+      const { naturalWidth: width, naturalHeight: height } = image;
 
       canvas.width = width;
       canvas.height = height;
@@ -230,6 +223,21 @@ export default function ImageCropper({
     }
   }, [cropArea, imageLoaded, onCrop]);
 
+  const handleUseOriginalImage = useCallback(async () => {
+    if (!onUseOriginal) return;
+    
+    setIsProcessing(true);
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 300)); // Smooth UX delay
+      onUseOriginal(imageSrc);
+    } catch (error) {
+      console.error("Failed to use original image:", error);
+      alert("เกิดข้อผิดพลาดในการใช้รูปต้นฉบับ");
+    } finally {
+      setIsProcessing(false);
+    }
+  }, [imageSrc, onUseOriginal]);
+
   const resetCrop = useCallback(() => {
     setCropArea({ x: 0, y: 0, width: 0, height: 0 });
   }, []);
@@ -242,14 +250,14 @@ export default function ImageCropper({
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-500/20 rounded-lg">
-              <Crop className="w-5 h-5 text-blue-400" />
+            <div className="p-2 bg-neutral-800/50 rounded-lg">
+              <Crop className="w-5 h-5 text-neutral-400" />
             </div>
             <div>
               <h3 className="text-lg font-semibold text-white">
                 ครอบตัดรูป QR Code
               </h3>
-              <p className="text-xs text-neutral-400">เลือกพื้นที่ที่ต้องการ</p>
+              <p className="text-xs text-neutral-400">เลือกพื้นที่ที่ต้องการ หรือใช้รูปต้นฉบับ</p>
             </div>
           </div>
           <button
@@ -264,13 +272,13 @@ export default function ImageCropper({
         <div className="bg-neutral-800/50 rounded-xl p-3 mb-4">
           <p className="text-sm text-neutral-300 text-center">
             <span className="hidden sm:inline">
-              ลากเมาส์เพื่อเลือกพื้นที่ QR Code
+              ลากเมาส์เพื่อเลือกพื้นที่ QR Code หรือใช้รูปต้นฉบับ
             </span>
             <span className="sm:hidden">
-              แตะและลากเพื่อเลือกพื้นที่ QR Code
+              แตะและลากเพื่อเลือกพื้นที่ QR Code หรือใช้รูปต้นฉบับ
             </span>
             {hasCropArea && (
-              <span className="block text-xs text-blue-400 mt-1">
+              <span className="block text-xs text-neutral-400 mt-1">
                 ขนาด: {Math.round(cropArea.width)} ×{" "}
                 {Math.round(cropArea.height)} px
               </span>
@@ -281,12 +289,12 @@ export default function ImageCropper({
         {/* Canvas Container */}
         <div
           ref={containerRef}
-          className="relative overflow-auto max-h-[55vh] bg-neutral-800/30 rounded-xl border border-neutral-700/50"
+          className="relative overflow-auto max-h-[60vh] bg-neutral-800/30 rounded-xl border border-neutral-700/50"
         >
           {!imageLoaded && (
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="text-center">
-                <Loader2 className="w-8 h-8 animate-spin text-blue-400 mx-auto mb-2" />
+                <Loader2 className="w-8 h-8 animate-spin text-neutral-400 mx-auto mb-2" />
                 <p className="text-sm text-neutral-400">กำลังโหลดรูป...</p>
               </div>
             </div>
@@ -294,7 +302,7 @@ export default function ImageCropper({
 
           <canvas
             ref={canvasRef}
-            className={`max-w-full h-auto cursor-crosshair touch-none transition-opacity duration-300 ${
+            className={`cursor-crosshair touch-none transition-opacity duration-300 ${
               imageLoaded ? "opacity-100" : "opacity-0"
             }`}
             onMouseDown={handleStart}
@@ -322,16 +330,36 @@ export default function ImageCropper({
           <button
             onClick={resetCrop}
             disabled={!hasCropArea || isProcessing}
-            className="flex items-center justify-center gap-2 px-4 py-2.5 text-neutral-300 border border-neutral-700 rounded-xl hover:bg-neutral-800 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed order-2 sm:order-1"
+            className="flex items-center justify-center gap-2 px-4 py-2.5 text-neutral-300 border border-neutral-700 rounded-xl hover:bg-neutral-800 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed order-3 sm:order-1"
           >
             <RotateCcw size={16} />
             <span className="text-sm">รีเซ็ต</span>
           </button>
 
+          {onUseOriginal && (
+            <button
+              onClick={handleUseOriginalImage}
+              disabled={isProcessing}
+              className="flex items-center justify-center gap-2 flex-1 py-2.5 px-4 bg-neutral-700 text-white rounded-xl hover:bg-neutral-600 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed order-1 sm:order-2"
+            >
+              {isProcessing ? (
+                <>
+                  <Loader2 size={16} className="animate-spin" />
+                  <span className="text-sm">กำลังประมวลผล...</span>
+                </>
+              ) : (
+                <>
+                  <Image size={16} />
+                  <span className="text-sm">ใช้รูปต้นฉบับ</span>
+                </>
+              )}
+            </button>
+          )}
+
           <button
             onClick={onCancel}
             disabled={isProcessing}
-            className="flex-1 py-2.5 px-4 text-neutral-300 border border-neutral-700 rounded-xl hover:bg-neutral-800 transition-all duration-200 disabled:opacity-50 order-3 sm:order-2"
+            className="flex-1 py-2.5 px-4 text-neutral-300 border border-neutral-700 rounded-xl hover:bg-neutral-800 transition-all duration-200 disabled:opacity-50 order-4 sm:order-3"
           >
             <span className="text-sm">ยกเลิก</span>
           </button>
@@ -339,7 +367,7 @@ export default function ImageCropper({
           <button
             onClick={handleCrop}
             disabled={!hasCropArea || isProcessing}
-            className="flex items-center justify-center gap-2 flex-1 py-2.5 px-4 bg-gradient-to-r from-blue-600 to-blue-500 text-white rounded-xl font-medium hover:from-blue-700 hover:to-blue-600 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed order-1 sm:order-3 shadow-lg"
+            className="flex items-center justify-center gap-2 flex-1 py-2.5 px-4 bg-white text-black rounded-xl font-medium hover:bg-white/90 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed order-2 sm:order-4 shadow-lg"
           >
             {isProcessing ? (
               <>

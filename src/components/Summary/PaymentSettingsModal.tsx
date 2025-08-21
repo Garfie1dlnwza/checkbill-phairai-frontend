@@ -1,6 +1,6 @@
 "use client";
 import { useState, useRef, useCallback, useMemo } from "react";
-import { Settings, QrCode, CreditCard, Upload, X, Loader2 } from "lucide-react";
+import { Settings, QrCode, CreditCard, Upload, X, Loader2, Crop } from "lucide-react";
 import { PaymentInfo } from "@/types/summary";
 import { validateFile } from "@/utils/imageUtils";
 import ImageCropper from "./ImageCropper";
@@ -24,7 +24,7 @@ export default function PaymentSettingsModal({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const processFile = useCallback(
-    async (file: File) => {
+    async (file: File, skipCrop = false) => {
       const validationError = validateFile(file);
       if (validationError) {
         alert(validationError);
@@ -38,9 +38,17 @@ export default function PaymentSettingsModal({
 
         reader.onload = (e) => {
           const dataUrl = e.target?.result as string;
-          setOriginalImage(dataUrl);
-          setShowCropper(true);
-          setIsUploading(false);
+          
+          if (skipCrop) {
+            // Use image directly without cropping
+            setFormData((prev) => ({ ...prev, qrCodeUrl: dataUrl }));
+            setIsUploading(false);
+          } else {
+            // Show cropper
+            setOriginalImage(dataUrl);
+            setShowCropper(true);
+            setIsUploading(false);
+          }
         };
 
         reader.onerror = () => {
@@ -98,9 +106,22 @@ export default function PaymentSettingsModal({
     setOriginalImage("");
   }, []);
 
+  const handleUseOriginal = useCallback(() => {
+    setFormData((prev) => ({ ...prev, qrCodeUrl: originalImage }));
+    setShowCropper(false);
+    setOriginalImage("");
+  }, [originalImage]);
+
   const removeQrCode = useCallback(() => {
     setFormData((prev) => ({ ...prev, qrCodeUrl: "" }));
   }, []);
+
+  const openCropper = useCallback(() => {
+    if (formData.qrCodeUrl) {
+      setOriginalImage(formData.qrCodeUrl);
+      setShowCropper(true);
+    }
+  }, [formData.qrCodeUrl]);
 
   const handleSave = useCallback(() => {
     // Validate form data
@@ -243,9 +264,18 @@ export default function PaymentSettingsModal({
                         <X size={12} />
                       </button>
                     </div>
-                    <p className="text-xs text-white/50 mt-2">
-                      คลิกปุ่มด้านล่างเพื่อเปลี่ยนรูป
-                    </p>
+                    <div className="flex items-center gap-2 mt-2">
+                      <button
+                        onClick={openCropper}
+                        className="flex items-center gap-1 px-3 py-1 bg-white/10 hover:bg-white/20 rounded-lg text-xs text-white/70 hover:text-white transition-colors"
+                      >
+                        <Crop size={12} />
+                        ตัดแต่งรูป
+                      </button>
+                      <p className="text-xs text-white/50">
+                        คลิกปุ่มด้านล่างเพื่อเปลี่ยนรูป
+                      </p>
+                    </div>
                   </div>
                 )}
 
@@ -390,6 +420,7 @@ export default function PaymentSettingsModal({
             setShowCropper(false);
             setOriginalImage("");
           }}
+          onUseOriginal={handleUseOriginal}
         />
       )}
     </>

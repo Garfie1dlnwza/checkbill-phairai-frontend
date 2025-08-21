@@ -51,23 +51,23 @@ export default function SummaryContent() {
 
   const handleExport = async () => {
     if (!receiptRef.current) return;
-    
+
     setIsExporting(true);
-    
+
     try {
       // เก็บการตั้งค่าเดิม
       const originalOverflow = document.body.style.overflow;
       const originalTransform = receiptRef.current.style.transform;
       const originalBoxShadow = receiptRef.current.style.boxShadow;
-      
+
       // ตั้งค่าสำหรับการ export
       document.body.style.overflow = "visible";
       receiptRef.current.style.transform = "none";
       receiptRef.current.style.boxShadow = "none";
-      
+
       // รอให้ DOM อัพเดท
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
       const canvas = await html2canvas(receiptRef.current, {
         scale: 2, // เพิ่มความละเอียด
         useCORS: true,
@@ -78,32 +78,35 @@ export default function SummaryContent() {
         height: receiptRef.current.scrollHeight,
         onclone: (clonedDoc) => {
           // ปรับแต่ง cloned document ถ้าจำเป็น
-          const clonedElement = clonedDoc.querySelector('[data-receipt-content]');
+          const clonedElement = clonedDoc.querySelector(
+            "[data-receipt-content]"
+          );
           if (clonedElement) {
-            (clonedElement as HTMLElement).style.transform = 'none';
-            (clonedElement as HTMLElement).style.boxShadow = 'none';
+            (clonedElement as HTMLElement).style.transform = "none";
+            (clonedElement as HTMLElement).style.boxShadow = "none";
           }
-        }
+        },
       });
-      
+
       // คืนค่าการตั้งค่าเดิม
       document.body.style.overflow = originalOverflow;
       receiptRef.current.style.transform = originalTransform;
       receiptRef.current.style.boxShadow = originalBoxShadow;
-      
+
       // สร้างลิงก์ดาวน์โหลด
-      const link = document.createElement('a');
-      link.download = `bill-summary-${new Date().toLocaleDateString('th-TH').replace(/\//g, '-')}.png`;
-      link.href = canvas.toDataURL('image/png', 1.0);
-      
+      const link = document.createElement("a");
+      link.download = `bill-summary-${new Date()
+        .toLocaleDateString("th-TH")
+        .replace(/\//g, "-")}.png`;
+      link.href = canvas.toDataURL("image/png", 1.0);
+
       // ดาวน์โหลด
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      
     } catch (error) {
-      console.error('Error exporting receipt:', error);
-      alert('เกิดข้อผิดพลาดในการ export รูปภาพ');
+      console.error("Error exporting receipt:", error);
+      alert("เกิดข้อผิดพลาดในการ export รูปภาพ");
     } finally {
       setIsExporting(false);
     }
@@ -111,9 +114,9 @@ export default function SummaryContent() {
 
   const handleShare = async () => {
     if (!receiptRef.current) return;
-    
+
     setIsExporting(true);
-    
+
     try {
       const canvas = await html2canvas(receiptRef.current, {
         scale: 2,
@@ -122,39 +125,42 @@ export default function SummaryContent() {
         backgroundColor: null,
         logging: false,
       });
-      
-      canvas.toBlob(async (blob) => {
-        if (!blob) return;
-        
-        const file = new File([blob], `bill-summary-${Date.now()}.png`, {
-          type: 'image/png',
-        });
-        
-        if (navigator.share && navigator.canShare?.({ files: [file] })) {
-          try {
-            await navigator.share({
-              title: 'สรุปรายการ',
-              text: 'สรุปรายการค่าใช้จ่าย',
-              files: [file],
-            });
-          } catch (shareError) {
-            console.log('Share cancelled or failed:', shareError);
+
+      canvas.toBlob(
+        async (blob) => {
+          if (!blob) return;
+
+          const file = new File([blob], `bill-summary-${Date.now()}.png`, {
+            type: "image/png",
+          });
+
+          if (navigator.share && navigator.canShare?.({ files: [file] })) {
+            try {
+              await navigator.share({
+                title: "สรุปรายการ",
+                text: "สรุปรายการค่าใช้จ่าย",
+                files: [file],
+              });
+            } catch (shareError) {
+              console.log("Share cancelled or failed:", shareError);
+            }
+          } else {
+            // Fallback: Download the file
+            const link = document.createElement("a");
+            link.download = file.name;
+            link.href = URL.createObjectURL(blob);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(link.href);
           }
-        } else {
-          // Fallback: Download the file
-          const link = document.createElement('a');
-          link.download = file.name;
-          link.href = URL.createObjectURL(blob);
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          URL.revokeObjectURL(link.href);
-        }
-      }, 'image/png', 1.0);
-      
+        },
+        "image/png",
+        1.0
+      );
     } catch (error) {
-      console.error('Error sharing receipt:', error);
-      alert('เกิดข้อผิดพลาดในการแชร์รูปภาพ');
+      console.error("Error sharing receipt:", error);
+      alert("เกิดข้อผิดพลาดในการแชร์รูปภาพ");
     } finally {
       setIsExporting(false);
     }
@@ -301,35 +307,6 @@ export default function SummaryContent() {
           </div>
         ) : (
           <>
-            {/* Export/Share Buttons */}
-            <div className="flex flex-col sm:flex-row justify-center gap-4 mb-6">
-              <button
-                onClick={handleExport}
-                disabled={isExporting}
-                className="flex items-center justify-center gap-2 px-4 sm:px-6 py-3 rounded-xl bg-white text-black font-semibold shadow-lg hover:scale-105 transition-transform text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isExporting ? (
-                  <Loader2 size={16} className="animate-spin" />
-                ) : (
-                  <Download size={16} />
-                )}
-                <span>{isExporting ? "กำลัง Export..." : "ดาวน์โหลดรูป"}</span>
-              </button>
-              
-              <button
-                onClick={handleShare}
-                disabled={isExporting}
-                className="flex items-center justify-center gap-2 px-4 sm:px-6 py-3 rounded-xl bg-blue-600 text-white font-semibold shadow-lg hover:scale-105 hover:bg-blue-700 transition-all text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isExporting ? (
-                  <Loader2 size={16} className="animate-spin" />
-                ) : (
-                  <Share2 size={16} />
-                )}
-                <span>{isExporting ? "กำลังเตรียม..." : "แชร์"}</span>
-              </button>
-            </div>
-
             {/* Receipt Content */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -337,10 +314,10 @@ export default function SummaryContent() {
               transition={{ duration: 0.5 }}
               className="border border-white/10 bg-white/5 rounded-xl overflow-hidden"
             >
-              <div 
+              <div
                 ref={receiptRef}
                 data-receipt-content
-                className="p-6 bg-white"
+                className="p-6 bg-black/25"
               >
                 {receiptType === "minimal" ? (
                   <MinimalReceipt
