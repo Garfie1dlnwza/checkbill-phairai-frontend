@@ -159,16 +159,16 @@ export default function CardCreateItem({
 
   const modalContent = (
     <div
-      className="fixed top-0  w-screen h-screen z-[99999] flex items-center justify-center bg-black/70  animate-fade-in"
+      className="fixed inset-0 z-[99999] flex items-end sm:items-center justify-center bg-black/70 animate-fade-in"
       onClick={onClose}
     >
       <div
-        className="bg-neutral-900 w-full sm:max-w-3xl mx-4 border-0 sm:border sm:border-neutral-800 rounded-xl  shadow-xl overflow-hidden animate-slide-up flex flex-col"
+        className="bg-neutral-900 w-full h-[100dvh] sm:h-auto sm:max-w-3xl sm:mx-4 border-0 sm:border sm:border-neutral-800 sm:rounded-xl shadow-xl overflow-hidden animate-slide-up flex flex-col sm:max-h-[90vh]"
         onKeyDown={handleKeyDown}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 sm:p-6 border-b border-neutral-800 flex-shrink-0 ">
+        <div className="flex items-center justify-between p-4 sm:p-6 border-b border-neutral-800 flex-shrink-0">
           <h2 className="text-lg sm:text-xl font-semibold text-white">
             {initialData ? "แก้ไขรายการ" : "เพิ่มรายการใหม่"}
           </h2>
@@ -181,8 +181,8 @@ export default function CardCreateItem({
         </div>
 
         {/* Content - Scrollable */}
-        <div className="flex-1 overflow-y-auto">
-          <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
+        <div className="flex-1 overflow-y-auto overscroll-contain">
+          <div className="p-4 sm:p-6 space-y-4 sm:space-y-6 min-h-0">
             {/* Input fields - Stack on mobile, row on larger screens */}
             <div className="flex flex-col sm:flex-row gap-4">
               <div className="flex-1">
@@ -297,7 +297,7 @@ export default function CardCreateItem({
                   </button>
                 </div>
 
-                <div className="flex flex-wrap gap-2 max-h-40 sm:max-h-60 overflow-y-auto p-2 -m-2">
+                <div className="flex flex-wrap gap-2 max-h-32 sm:max-h-60 overflow-y-auto p-2 -m-2">
                   {dividerPersons.map((person) => {
                     const isSelected = shareWith.includes(person);
                     return (
@@ -411,11 +411,14 @@ export default function CardCreateItem({
                 )}
               </div>
             )}
+
+            {/* Add padding at bottom for mobile to ensure content is not hidden behind actions */}
+            <div className="h-4 sm:h-0"></div>
           </div>
         </div>
 
         {/* Actions - Fixed at bottom */}
-        <div className="flex flex-col sm:flex-row gap-3 p-4 sm:p-6 border-t border-neutral-800 flex-shrink-0">
+        <div className="flex flex-col sm:flex-row gap-3 p-4 sm:p-6 border-t border-neutral-800 flex-shrink-0 bg-neutral-900">
           <button
             onClick={onClose}
             className="flex-1 py-3 px-4 text-neutral-300 border border-neutral-700 rounded-lg hover:bg-neutral-800 hover:text-white transition-colors order-2 sm:order-1"
