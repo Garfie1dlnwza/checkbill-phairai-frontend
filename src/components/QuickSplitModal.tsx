@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { X, Users, Equal } from "lucide-react";
 import { motion } from "framer-motion";
+import { useLang } from "@/components/LanguageProvider";
 
 interface QuickSplitModalProps {
   persons: string[];
@@ -22,6 +23,7 @@ export default function QuickSplitModal({
   onAdd,
   onClose,
 }: QuickSplitModalProps) {
+  const { t } = useLang();
   const [total, setTotal] = useState("");
   const [name, setName] = useState("");
   const [includeVat, setIncludeVat] = useState(false);
@@ -44,7 +46,7 @@ export default function QuickSplitModal({
   const handleAdd = () => {
     if (!canAdd) return;
     onAdd({
-      name: name.trim() || "หารเท่ากัน",
+      name: name.trim() || t("split.defaultName"),
       qty: 1,
       price: totalNum,
       shareWith: selected,
@@ -69,7 +71,7 @@ export default function QuickSplitModal({
               <Equal size={18} className="text-[var(--accent)]" />
             </div>
             <h3 className="text-lg font-semibold text-[var(--text-primary)]">
-              หารเท่ากัน
+              {t("split.title")}
             </h3>
           </div>
           <button
@@ -85,11 +87,11 @@ export default function QuickSplitModal({
           {/* Name (optional) */}
           <div>
             <label className="block text-xs font-medium text-[var(--text-muted)] mb-1.5">
-              ชื่อรายการ (ไม่บังคับ)
+              {t("split.nameLabel")}
             </label>
             <input
               type="text"
-              placeholder="เช่น บิลโต๊ะนี้"
+              placeholder={t("split.namePlaceholder")}
               value={name}
               onChange={(e) => setName(e.target.value)}
               className="w-full px-3 py-2.5 bg-[var(--surface-overlay)] border border-[var(--surface-border)] rounded-xl text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/40 transition-all text-sm"
@@ -99,7 +101,7 @@ export default function QuickSplitModal({
           {/* Total amount */}
           <div>
             <label className="block text-xs font-medium text-[var(--text-muted)] mb-1.5">
-              ยอดรวมทั้งหมด (บาท) *
+              {t("split.totalLabel")}
             </label>
             <input
               type="number"
@@ -118,7 +120,7 @@ export default function QuickSplitModal({
               checked={includeVat}
               onChange={(e) => setIncludeVat(e.target.checked)}
             />
-            <span className="text-sm text-[var(--text-secondary)]">รวม VAT 7%</span>
+            <span className="text-sm text-[var(--text-secondary)]">{t("split.vatToggle")}</span>
             {includeVat && totalNum > 0 && (
               <span className="text-xs text-yellow-400 ml-auto">
                 +฿
@@ -134,15 +136,15 @@ export default function QuickSplitModal({
             <div>
               <div className="flex items-center justify-between mb-2">
                 <label className="text-xs font-medium text-[var(--text-muted)]">
-                  เลือกคนหาร ({selected.length}/{persons.length})
+                  {t("split.selectPeople")} ({selected.length}/{persons.length})
                 </label>
                 <button
                   onClick={toggleAll}
                   className="text-xs text-[var(--accent)] hover:underline"
                 >
                   {selected.length === persons.length
-                    ? "ยกเลิกทั้งหมด"
-                    : "เลือกทั้งหมด"}
+                    ? t("split.deselectAll")
+                    : t("split.selectAll")}
                 </button>
               </div>
               <div className="flex flex-wrap gap-2">
@@ -165,7 +167,7 @@ export default function QuickSplitModal({
             <div className="flex items-center gap-2 py-2.5 px-3 bg-[var(--surface-subtle)] rounded-xl">
               <Users size={15} className="text-[var(--text-muted)] flex-shrink-0" />
               <span className="text-sm text-[var(--text-muted)]">
-                ไปเพิ่มคนหารก่อนในหน้า "คนหาร"
+                {t("split.noPeople")}
               </span>
             </div>
           )}
@@ -173,7 +175,7 @@ export default function QuickSplitModal({
           {/* Per-person result */}
           {canAdd && (
             <div className="bg-[var(--surface-overlay)] rounded-xl px-4 py-3 flex justify-between items-center">
-              <span className="text-sm text-[var(--text-secondary)]">ตกคนละ</span>
+              <span className="text-sm text-[var(--text-secondary)]">{t("split.perPersonLabel")}</span>
               <span className="text-xl font-bold text-emerald-400">
                 ฿
                 {perPerson.toLocaleString(undefined, {
@@ -190,14 +192,14 @@ export default function QuickSplitModal({
             onClick={onClose}
             className="flex-1 py-2.5 text-[var(--text-secondary)] border border-[var(--surface-border)] rounded-xl hover:bg-[var(--surface-overlay)] transition-colors text-sm"
           >
-            ยกเลิก
+            {t("split.cancel")}
           </button>
           <button
             onClick={handleAdd}
             disabled={!canAdd}
             className="flex-1 py-2.5 bg-[var(--accent)] text-[var(--on-accent)] rounded-xl font-semibold hover:bg-[var(--accent-hover)] transition-colors text-sm disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            เพิ่มรายการ
+            {t("split.addItem")}
           </button>
         </div>
       </motion.div>

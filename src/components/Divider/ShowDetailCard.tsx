@@ -1,11 +1,14 @@
+"use client";
 import React from "react";
 import { Item } from "@/controllers/ListItem.controller";
+import { useLang } from "@/components/LanguageProvider";
 
 interface ShowDetailCardProps {
   name: string;
   items: Item[];
 }
 export default function ShowDetailCard({ name, items }: ShowDetailCardProps) {
+  const { t } = useLang();
   const VAT_RATE = 0.07;
   const filteredItems = items.filter(
     (item) => Array.isArray(item.shareWith) && item.shareWith.includes(name)
@@ -13,9 +16,9 @@ export default function ShowDetailCard({ name, items }: ShowDetailCardProps) {
 
   return (
     <div className="bg-[var(--surface-overlay)] rounded-2xl p-5 mt-2 text-[var(--text-primary)] shadow-lg">
-      <h3 className="font-semibold mb-2 text-md text-[var(--text-primary)]">รายละเอียดของ {name}</h3>
+      <h3 className="font-semibold mb-2 text-md text-[var(--text-primary)]">{t("detail.title")} {name}</h3>
       {filteredItems.length === 0 ? (
-        <p className="text-[var(--text-secondary)] text-center">ไม่มีรายการที่ต้องจ่าย</p>
+        <p className="text-[var(--text-secondary)] text-center">{t("detail.empty")}</p>
       ) : (
         <ul className="space-y-3">
           {filteredItems.map((item, idx) => {
@@ -33,7 +36,7 @@ export default function ShowDetailCard({ name, items }: ShowDetailCardProps) {
                     </span>
                     {item.includeVat && (
                       <span className="block text-xs text-[var(--text-muted)]">
-                        ฿{vat.toLocaleString(undefined, { maximumFractionDigits: 2 })} <span className="ml-1">VAT 7%</span>
+                        ฿{vat.toLocaleString(undefined, { maximumFractionDigits: 2 })} <span className="ml-1">{t("detail.vat")}</span>
                       </span>
                     )}
                   </div>

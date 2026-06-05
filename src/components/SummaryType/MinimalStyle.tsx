@@ -2,6 +2,7 @@
 import { toBlob } from "html-to-image";
 import { useEffect, useState, useRef } from "react";
 import { Share2 } from "lucide-react";
+import { useLang } from "@/components/LanguageProvider";
 
 type Item = {
   id: string;
@@ -40,6 +41,7 @@ export default function MinimalReceipt({
   const [isPrinting, setIsPrinting] = useState(printMode);
   const [printedSections, setPrintedSections] = useState<Set<string>>(new Set());
   const [currentPrintLine, setCurrentPrintLine] = useState(0);
+  const { t } = useLang();
   const [showCutter, setShowCutter] = useState(false);
   const [isFullyRendered, setIsFullyRendered] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
@@ -170,7 +172,7 @@ export default function MinimalReceipt({
       const file = new File([blob], filename, { type: "image/png" });
 
       if (navigator.canShare?.({ files: [file] })) {
-        await navigator.share({ files: [file], title: "สรุปบิล" });
+        await navigator.share({ files: [file], title: t("receipt.shareTitle") });
       } else {
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
@@ -275,8 +277,8 @@ export default function MinimalReceipt({
                               : "opacity-0"
                           }`}
                         >
-                          <span className="hidden sm:inline">หาร: </span>
-                          <span className="sm:hidden">หาร:</span>
+                          <span className="hidden sm:inline">{t("receipt.dividerLabel")} </span>
+                          <span className="sm:hidden">{t("receipt.dividerLabel")}</span>
                           <span className="break-words">{item.shareWith.join(", ")}</span>
                         </div>
                       )}
@@ -320,7 +322,7 @@ export default function MinimalReceipt({
                 </span>
               </div>
               <div className="flex justify-between text-sm sm:text-base font-bold mt-1">
-                <span>รวมทั้งหมด</span>
+                <span>{t("receipt.totalAll")}</span>
                 <span>
                   ฿
                   {(totalBill + totalVat).toLocaleString(undefined, {
@@ -383,7 +385,7 @@ export default function MinimalReceipt({
                         e.currentTarget.style.display = 'none';
                       }}
                     />
-                    <p className="text-xs text-gray-500 mt-2">สแกน QR Code เพื่อชำระเงิน</p>
+                    <p className="text-xs text-gray-500 mt-2">{t("receipt.qrScan")}</p>
                   </div>
                 )}
                 {paymentInfo.type === "bank" && (
@@ -394,7 +396,7 @@ export default function MinimalReceipt({
                           isSectionVisible("payment", 0) ? "opacity-100" : "opacity-0"
                         }`}
                       >
-                        <span>ธนาคาร:</span>
+                        <span>{t("receipt.bank")}</span>
                         <span>{paymentInfo.bankName}</span>
                       </div>
                     )}
@@ -404,7 +406,7 @@ export default function MinimalReceipt({
                           isSectionVisible("payment", 1) ? "opacity-100" : "opacity-0"
                         }`}
                       >
-                        <span>เลขบัญชี:</span>
+                        <span>{t("receipt.accountNumber")}</span>
                         <span className="font-mono">{paymentInfo.accountNumber}</span>
                       </div>
                     )}
@@ -414,7 +416,7 @@ export default function MinimalReceipt({
                           isSectionVisible("payment", 2) ? "opacity-100" : "opacity-0"
                         }`}
                       >
-                        <span>ชื่อบัญชี:</span>
+                        <span>{t("receipt.accountName")}</span>
                         <span>{paymentInfo.accountName}</span>
                       </div>
                     )}
@@ -481,7 +483,7 @@ export default function MinimalReceipt({
                     ? "opacity-50 cursor-not-allowed"
                     : "hover:bg-gray-100"
                 }`}
-                aria-label="แชร์รูปใบเสร็จ"
+                aria-label={t("receipt.ariaShare")}
               >
                 <Share2
                   size={16}
@@ -489,10 +491,10 @@ export default function MinimalReceipt({
                 />
                 <span className="text-sm font-medium">
                   {isExporting
-                    ? "กำลังเตรียม..."
+                    ? t("receipt.preparing")
                     : !isFullyRendered
-                    ? "กำลังโหลด..."
-                    : "แชร์รูป"}
+                    ? t("receipt.loading")
+                    : t("receipt.shareBtn")}
                 </span>
               </button>
             </div>

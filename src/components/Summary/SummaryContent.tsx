@@ -13,11 +13,13 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import MinimalReceipt from "@/components/SummaryType/MinimalStyle";
 import ColorStyle from "@/components/SummaryType/ColorStyle";
+import { useLang } from "@/components/LanguageProvider";
 import { ReceiptType, ReceiptOption } from "@/types/summary";
 import { useSummaryData } from "@/hooks/useSummaryData";
 import PaymentSettingsModal from "./PaymentSettingsModal";
 
 export default function SummaryContent() {
+  const { t } = useLang();
   const { items, persons, paymentInfo, isLoading, savePaymentInfo } =
     useSummaryData();
   const [receiptType, setReceiptType] = useState<ReceiptType>("minimal");
@@ -48,9 +50,9 @@ export default function SummaryContent() {
         <div className="text-center">
           <Loader2 className="w-12 h-12 animate-spin text-[var(--accent)] mx-auto mb-4" />
           <h3 className="text-lg font-medium text-[var(--text-primary)] mb-2">
-            กำลังโหลดข้อมูล
+            {t("summary.loading")}
           </h3>
-          <p className="text-[var(--text-secondary)]">กรุณารอสักครู่...</p>
+          <p className="text-[var(--text-secondary)]">{t("summary.loadingDesc")}</p>
         </div>
       </div>
     );
@@ -62,7 +64,7 @@ export default function SummaryContent() {
         {/* Header */}
         <div className="flex items-center justify-center mb-6 md:mb-8">
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white text-center">
-            สรุปรายการ
+            {t("summary.title")}
           </h1>
         </div>
 
@@ -137,15 +139,15 @@ export default function SummaryContent() {
                   <div className="text-left">
                     <p className="text-sm font-medium text-[var(--text-primary)]">
                       {paymentInfo.type === "none"
-                        ? "เพิ่มข้อมูลการชำระเงิน"
-                        : "ข้อมูลการชำระเงิน"}
+                        ? t("summary.paymentNone")
+                        : t("summary.paymentSet")}
                     </p>
                     <p className="text-xs text-[var(--text-secondary)]">
                       {paymentInfo.type === "none"
-                        ? "แตะเพื่อเพิ่มข้อมูล QR Code หรือบัญชีธนาคาร"
+                        ? t("summary.paymentNoneHint")
                         : paymentInfo.type === "qr"
-                        ? "QR Code พร้อมใช้งาน"
-                        : "บัญชีธนาคารพร้อมใช้งาน"}
+                        ? t("summary.paymentQrReady")
+                        : t("summary.paymentBankReady")}
                     </p>
                   </div>
                 </div>
@@ -168,17 +170,17 @@ export default function SummaryContent() {
           <div className="flex flex-col items-center justify-center py-12 border border-[var(--surface-border)] bg-[var(--surface-subtle)] rounded-xl">
             <FileText className="text-[var(--text-muted)] mb-4" size={48} />
             <h3 className="text-lg font-medium text-[var(--text-primary)] mb-2">
-              ไม่พบข้อมูลรายการ
+              {t("summary.noData")}
             </h3>
             <p className="text-[var(--text-secondary)] text-sm mb-6 max-w-md mx-auto text-center">
-              กรุณาเพิ่มรายการอาหารและกำหนดคนที่จะหารค่าใช้จ่ายก่อนดูสรุป
+              {t("summary.noDataDesc")}
             </p>
             <button
               onClick={() => window.history.back()}
               className="flex items-center gap-2 px-4 sm:px-6 py-3 rounded-xl bg-[var(--accent)] text-[var(--on-accent)] font-semibold shadow-lg hover:bg-[var(--accent-hover)] transition-colors text-sm sm:text-base"
             >
               <ArrowLeft size={16} />
-              <span>กลับไปเพิ่มรายการ</span>
+              <span>{t("summary.backToAdd")}</span>
             </button>
           </div>
         ) : (

@@ -7,12 +7,14 @@ import { ListItemController, Item } from "@/controllers/ListItem.controller";
 import CardCreateItem from "@/components/CardCreateItem";
 import BadgeDivider from "@/components/BadgeDivider";
 import QuickSplitModal from "@/components/QuickSplitModal";
+import { useLang } from "@/components/LanguageProvider";
 const STORAGE_KEY = process.env.NEXT_PUBLIC_STORAGE_KEY;
 const DIVIDER_KEY = process.env.NEXT_PUBLIC_DIVIDER_KEY;
 
 const VAT_RATE = 0.07;
 
 export default function ListItemPage() {
+  const { t } = useLang();
   const [rows, setRows] = useState<Item[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
   const [personCount, setPersonCount] = useState(0);
@@ -153,9 +155,7 @@ export default function ListItemPage() {
 
   // ฟังก์ชันล้างบิลทั้งหมด
   const handleClearBill = () => {
-    const confirmed = window.confirm(
-      "คุณต้องการล้างข้อมูลบิลทั้งหมดใช่หรือไม่?\n\nข้อมูลที่จะถูกลบ:\n- รายการอาหารทั้งหมด\n- รายชื่อคนหาร\n- ข้อมูลการชำระเงิน\n\nการกระทำนี้ไม่สามารถย้อนกลับได้"
-    );
+    const confirmed = window.confirm(t("list.confirmClear"));
     
     if (confirmed) {
       // ล้าง localStorage ทั้งหมดที่เกี่ยวข้อง
@@ -172,8 +172,7 @@ export default function ListItemPage() {
       setShowCreate(false);
       setEditRow(null);
       
-      // แจ้งเตือนเมื่อล้างเสร็จ
-      alert("ล้างข้อมูลบิลเรียบร้อยแล้ว");
+      alert(t("list.clearSuccess"));
     }
   };
 
@@ -190,15 +189,15 @@ export default function ListItemPage() {
     <div className="min-h-screen flex justify-center items-start py-8 md:py-16 px-2 sm:px-4">
       <div className="relative border border-[var(--surface-border)] rounded-2xl max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 bg-[var(--surface-raised)] shadow-2xl z-10">
         <div className="flex items-center justify-center mb-6 md:mb-8">
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white text-center">รายการอาหาร</h1>
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white text-center">{t("list.title")}</h1>
         </div>
         
         <div className="flex flex-col sm:flex-row justify-between items-center sm:items-end gap-2 mb-4 md:mb-6">
           <span className="text-base sm:text-lg lg:text-xl text-[var(--text-secondary)] text-center sm:text-left">
-            จำนวนคนหาร: {personCount}
+            {t("list.dividerCount")}: {personCount}
           </span>
           <span className="text-lg sm:text-xl text-[var(--accent)] font-bold text-center sm:text-right">
-            รวม: {total.toLocaleString()} บาท
+            {t("list.total")}: {total.toLocaleString()} {t("list.baht")}
           </span>
         </div>
 
@@ -207,7 +206,7 @@ export default function ListItemPage() {
           {rows.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 border border-[var(--surface-border)] bg-[var(--surface-subtle)] rounded-xl">
               <ShoppingCart className="text-[var(--text-muted)] mb-4" size={48} />
-              <div className="text-[var(--text-secondary)] text-lg">ยังไม่มีรายการ</div>
+              <div className="text-[var(--text-secondary)] text-lg">{t("list.empty")}</div>
             </div>
           ) : (
             <div className="space-y-4">
@@ -245,14 +244,14 @@ export default function ListItemPage() {
                           <button
                             onClick={() => setEditRow(row)}
                             className="p-2 rounded-full hover:bg-blue-500/20 transition-colors"
-                            aria-label="แก้ไข"
+                            aria-label={t("list.editLabel")}
                           >
                             <Edit2 className="text-blue-400" size={18} />
                           </button>
                           <button
                             onClick={() => handleDelete(row.id)}
                             className="p-2 rounded-full hover:bg-red-500/20 transition-colors"
-                            aria-label="ลบ"
+                            aria-label={t("list.deleteLabel")}
                           >
                             <Trash2 className="text-red-400" size={18} />
                           </button>
@@ -262,19 +261,19 @@ export default function ListItemPage() {
                       {/* Details Grid */}
                       <div className="grid grid-cols-2 gap-3 text-sm">
                         <div>
-                          <span className="text-[var(--text-secondary)]">จำนวน:</span>
+                          <span className="text-[var(--text-secondary)]">{t("list.labelQty")}</span>
                           <span className="text-[var(--text-primary)] font-semibold ml-2">{row.qty}</span>
                         </div>
                         <div>
-                          <span className="text-[var(--text-secondary)]">ราคา:</span>
+                          <span className="text-[var(--text-secondary)]">{t("list.labelPrice")}</span>
                           <span className="text-[var(--text-primary)] font-semibold ml-2">{row.price}</span>
                         </div>
                         <div>
-                          <span className="text-[var(--text-secondary)]">รวม:</span>
+                          <span className="text-[var(--text-secondary)]">{t("list.labelSum")}</span>
                           <span className="text-[var(--text-primary)] font-semibold ml-2">{sum.toLocaleString()}</span>
                         </div>
                         <div>
-                          <span className="text-[var(--text-secondary)]">VAT ต่อคน:</span>
+                          <span className="text-[var(--text-secondary)]">{t("list.labelVat")}</span>
                           <span className="text-yellow-400 font-semibold ml-2">
                             {row.shareWith.length > 0
                               ? vatPerPerson.toLocaleString(undefined, {
@@ -288,21 +287,21 @@ export default function ListItemPage() {
                       {/* Per Person */}
                       <div className="border-t border-[var(--surface-border)] pt-3">
                         <div className="text-center">
-                          <span className="text-[var(--text-secondary)] text-sm">ตกคนละ:</span>
+                          <span className="text-[var(--text-secondary)] text-sm">{t("list.labelPerPerson")}</span>
                           <span className="text-green-400 font-bold text-lg ml-2">
                             {row.shareWith.length > 0
                               ? perPersonWithVat.toLocaleString(undefined, {
                                   maximumFractionDigits: 2,
                                 })
                               : "—"}
-                            {row.shareWith.length > 0 && " บาท"}
+                            {row.shareWith.length > 0 && ` ${t("list.baht")}`}
                           </span>
                         </div>
                       </div>
 
                       {/* Share With */}
                       <div>
-                        <div className="text-[var(--text-secondary)] text-sm mb-2">คนหาร:</div>
+                        <div className="text-[var(--text-secondary)] text-sm mb-2">{t("list.labelDividers")}</div>
                         <div className="flex flex-wrap gap-2">
                           {row.shareWith.length > 0 ? (
                             row.shareWith.map((name) => (
@@ -332,35 +331,35 @@ export default function ListItemPage() {
           {rows.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12">
               <ShoppingCart className="text-[var(--text-muted)] mb-4" size={48} />
-              <div className="text-[var(--text-secondary)] text-lg">ยังไม่มีรายการ</div>
+              <div className="text-[var(--text-secondary)] text-lg">{t("list.empty")}</div>
             </div>
           ) : (
             <table className="w-full text-[var(--text-primary)]">
               <thead>
                 <tr className="border-b border-[var(--surface-border)] bg-[var(--surface-overlay)]">
                   <th className="py-3 px-2 lg:px-4 text-sm lg:text-lg font-semibold text-center min-w-[100px]">
-                    เมนู
+                    {t("list.colMenu")}
                   </th>
                   <th className="py-3 px-2 lg:px-4 text-sm lg:text-lg font-semibold text-center min-w-[60px]">
-                    จำนวน
+                    {t("list.colQty")}
                   </th>
                   <th className="py-3 px-2 lg:px-4 text-sm lg:text-lg font-semibold text-center min-w-[60px]">
-                    ราคา
+                    {t("list.colPrice")}
                   </th>
                   <th className="py-3 px-2 lg:px-4 text-sm lg:text-lg font-semibold text-center min-w-[60px]">
-                    รวม
+                    {t("list.colSum")}
                   </th>
                   <th className="py-3 px-2 lg:px-4 text-sm lg:text-lg font-semibold text-center min-w-[80px]">
-                    VAT ต่อคน
+                    {t("list.colVat")}
                   </th>
                   <th className="py-3 px-2 lg:px-4 text-sm lg:text-lg font-semibold text-center min-w-[80px]">
-                    ตกคนละ
+                    {t("list.colPerPerson")}
                   </th>
                   <th className="py-3 px-2 lg:px-4 text-sm lg:text-lg font-semibold text-center min-w-[120px]">
-                    คนหาร
+                    {t("list.colDividers")}
                   </th>
                   <th className="py-3 px-2 lg:px-4 text-sm lg:text-lg font-semibold text-center min-w-[80px]">
-                    จัดการ
+                    {t("list.colManage")}
                   </th>
                 </tr>
               </thead>
@@ -442,14 +441,14 @@ export default function ListItemPage() {
                             <button
                               onClick={() => setEditRow(row)}
                               className="p-1 lg:p-2 rounded-full hover:bg-blue-500/20 transition-colors"
-                              aria-label="แก้ไข"
+                              aria-label={t("list.editLabel")}
                             >
                               <Edit2 className="text-blue-400" size={16} />
                             </button>
                             <button
                               onClick={() => handleDelete(row.id)}
                               className="p-1 lg:p-2 rounded-full hover:bg-red-500/20 transition-colors"
-                              aria-label="ลบ"
+                              aria-label={t("list.deleteLabel")}
                             >
                               <Trash2 className="text-red-400" size={16} />
                             </button>
@@ -471,24 +470,23 @@ export default function ListItemPage() {
             className="flex items-center justify-center gap-2 px-4 sm:px-6 py-3 rounded-xl bg-[var(--accent)] text-[var(--on-accent)] font-semibold shadow-lg hover:bg-[var(--accent-hover)] transition-colors text-sm sm:text-base"
           >
             <Plus size={20} />
-            เพิ่มรายการ
+            {t("list.addItem")}
           </button>
           <button
             onClick={() => setShowQuickSplit(true)}
             className="flex items-center justify-center gap-2 px-4 sm:px-6 py-3 rounded-xl border border-[var(--surface-border)] bg-[var(--surface-overlay)] text-[var(--text-primary)] font-semibold hover:border-[var(--accent)]/50 hover:bg-[var(--surface-subtle)] transition-colors text-sm sm:text-base"
           >
             <Equal size={20} />
-            หารเท่ากัน
+            {t("list.quickSplit")}
           </button>
-          
-          {/* Clear Bill Button */}
+
           {(rows.length > 0 || personCount > 0) && (
             <button
               onClick={handleClearBill}
               className="flex items-center justify-center gap-2 px-4 sm:px-6 py-3 rounded-xl bg-red-600 text-white font-semibold shadow-lg hover:scale-105 hover:bg-red-700 transition-all text-sm sm:text-base"
             >
               <RotateCcw size={20} />
-              ล้างบิลทั้งหมด
+              {t("list.clearBill")}
             </button>
           )}
         </div>

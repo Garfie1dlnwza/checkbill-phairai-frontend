@@ -4,6 +4,7 @@ import { Settings, QrCode, CreditCard, Upload, X, Loader2, Crop } from "lucide-r
 import { PaymentInfo } from "@/types/summary";
 import { validateFile } from "@/utils/imageUtils";
 import ImageCropper from "./ImageCropper";
+import { useLang } from "@/components/LanguageProvider";
 
 interface PaymentSettingsModalProps {
   paymentInfo: PaymentInfo;
@@ -16,6 +17,7 @@ export default function PaymentSettingsModal({
   onSave,
   onClose,
 }: PaymentSettingsModalProps) {
+  const { t } = useLang();
   const [formData, setFormData] = useState<PaymentInfo>(paymentInfo);
   const [isUploading, setIsUploading] = useState(false);
   const [showCropper, setShowCropper] = useState(false);
@@ -52,14 +54,14 @@ export default function PaymentSettingsModal({
         };
 
         reader.onerror = () => {
-          alert("เกิดข้อผิดพลาดในการอ่านไฟล์");
+          alert(t("payment.errorFile"));
           setIsUploading(false);
         };
 
         reader.readAsDataURL(file);
       } catch (error) {
         console.error("File processing error:", error);
-        alert("เกิดข้อผิดพลาดในการประมวลผลไฟล์");
+        alert(t("payment.errorProcess"));
         setIsUploading(false);
       }
     },
@@ -131,11 +133,11 @@ export default function PaymentSettingsModal({
         !formData.accountNumber?.trim() ||
         !formData.accountName?.trim()
       ) {
-        alert("กรุณากรอกข้อมูลธนาคารให้ครบถ้วน");
+        alert(t("payment.errorBank"));
         return;
       }
     } else if (formData.type === "qr" && !formData.qrCodeUrl) {
-      alert("กรุณาอัปโหลดรูป QR Code");
+      alert(t("payment.errorQr"));
       return;
     }
 
@@ -167,10 +169,10 @@ export default function PaymentSettingsModal({
             </div>
             <div>
               <h3 className="text-lg font-semibold text-[var(--text-primary)]">
-                ตั้งค่าการชำระเงิน
+                {t("payment.title")}
               </h3>
               <p className="text-xs text-[var(--text-secondary)]">
-                เลือกวิธีการชำระเงินที่ต้องการแสดง
+                {t("payment.subtitle")}
               </p>
             </div>
           </div>
@@ -179,23 +181,23 @@ export default function PaymentSettingsModal({
             {/* Payment Type Selection */}
             <div>
               <label className="block text-sm font-medium text-[var(--text-secondary)] mb-3">
-                ประเภทการชำระเงิน
+                {t("payment.typeLabel")}
               </label>
               <div className="space-y-3">
                 {[
                   {
                     value: "none",
-                    label: "ไม่แสดงข้อมูลการชำระเงิน",
+                    label: t("payment.typeNone"),
                     icon: null,
                   },
                   {
                     value: "qr",
-                    label: "QR Code PromptPay",
+                    label: t("payment.typeQr"),
                     icon: <QrCode size={18} className="text-white/70" />,
                   },
                   {
                     value: "bank",
-                    label: "เลขบัญชีธนาคาร",
+                    label: t("payment.typeBank"),
                     icon: <CreditCard size={18} className="text-white/70" />,
                   },
                 ].map((option) => (
@@ -244,7 +246,7 @@ export default function PaymentSettingsModal({
             {formData.type === "qr" && (
               <div className="space-y-4">
                 <label className="block text-sm font-medium text-[var(--text-secondary)]">
-                  อัปโหลดรูป QR Code
+                  {t("payment.qrUpload")}
                 </label>
 
                 {/* Current QR Code Preview */}
@@ -270,10 +272,10 @@ export default function PaymentSettingsModal({
                         className="flex items-center gap-1 px-3 py-1 bg-[var(--surface-overlay)] hover:bg-[var(--surface-subtle)] rounded-lg text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
                       >
                         <Crop size={12} />
-                        ตัดแต่งรูป
+                        {t("payment.qrCurrent")}
                       </button>
                       <p className="text-xs text-[var(--text-muted)]">
-                        คลิกปุ่มด้านล่างเพื่อเปลี่ยนรูป
+                        {t("payment.qrChange")}
                       </p>
                     </div>
                   </div>
@@ -308,7 +310,7 @@ export default function PaymentSettingsModal({
                           className="text-[var(--accent)] animate-spin mb-3"
                         />
                         <span className="text-sm text-[var(--text-secondary)]">
-                          กำลังอัปโหลด...
+                          {t("payment.uploading")}
                         </span>
                       </>
                     ) : (
@@ -317,10 +319,10 @@ export default function PaymentSettingsModal({
                           <Upload size={24} className="text-[var(--text-secondary)]" />
                         </div>
                         <span className="text-sm text-[var(--text-primary)] font-medium mb-1">
-                          แตะเพื่อเลือกรูป หรือลากไฟล์มาวาง
+                          {t("payment.uploadHint")}
                         </span>
                         <span className="text-xs text-[var(--text-muted)]">
-                          รองรับ JPG, PNG, WebP (ไม่เกิน 5MB)
+                          {t("payment.uploadLimit")}
                         </span>
                       </>
                     )}
@@ -333,17 +335,17 @@ export default function PaymentSettingsModal({
             {formData.type === "bank" && (
               <div className="space-y-4">
                 <label className="block text-sm font-medium text-[var(--text-secondary)]">
-                  ข้อมูลบัญชีธนาคาร
+                  {t("payment.bankInfo")}
                 </label>
 
                 <div className="grid gap-4">
                   <div>
                     <label className="block text-xs font-medium text-[var(--text-muted)] mb-2">
-                      ชื่อธนาคาร *
+                      {t("payment.bankName")}
                     </label>
                     <input
                       type="text"
-                      placeholder="เช่น ธนาคารกรุงเทพ, ธนาคารกสิกรไทย"
+                      placeholder={t("payment.bankNamePlaceholder")}
                       value={formData.bankName || ""}
                       onChange={(e) =>
                         setFormData({ ...formData, bankName: e.target.value })
@@ -354,7 +356,7 @@ export default function PaymentSettingsModal({
 
                   <div>
                     <label className="block text-xs font-medium text-[var(--text-muted)] mb-2">
-                      เลขบัญชี *
+                      {t("payment.accountNumber")}
                     </label>
                     <input
                       type="text"
@@ -372,11 +374,11 @@ export default function PaymentSettingsModal({
 
                   <div>
                     <label className="block text-xs font-medium text-[var(--text-muted)] mb-2">
-                      ชื่อบัญชี *
+                      {t("payment.accountName")}
                     </label>
                     <input
                       type="text"
-                      placeholder="นาย/นาง/นางสาว ชื่อผู้ถือบัญชี"
+                      placeholder={t("payment.accountNamePlaceholder")}
                       value={formData.accountName || ""}
                       onChange={(e) =>
                         setFormData({
@@ -398,14 +400,14 @@ export default function PaymentSettingsModal({
               onClick={onClose}
               className="flex-1 py-3 px-4 text-[var(--text-secondary)] border border-[var(--surface-border)] rounded-xl hover:bg-[var(--surface-overlay)] hover:border-[var(--accent)]/30 transition-all duration-200 order-2 sm:order-1"
             >
-              ยกเลิก
+              {t("payment.cancel")}
             </button>
             <button
               onClick={handleSave}
               disabled={isUploading || !isFormValid}
               className="flex-1 py-3 px-4 bg-[var(--accent)] text-[var(--on-accent)] rounded-xl font-medium hover:bg-[var(--accent-hover)] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed order-1 sm:order-2 shadow-lg"
             >
-              {isUploading ? "กำลังอัปโหลด..." : "บันทึก"}
+              {isUploading ? t("payment.uploading") : t("payment.save")}
             </button>
           </div>
         </div>

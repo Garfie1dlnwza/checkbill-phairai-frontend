@@ -6,9 +6,13 @@ import { usePathname } from "next/navigation";
 import { navbarItems } from "@/constants/navbarItem";
 import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import ThemeToggle from "@/components/ThemeToggle";
+import LangToggle from "@/components/LangToggle";
+import { useLang } from "@/components/LanguageProvider";
 
 export default function Navbar() {
   const pathname = usePathname();
+  const { t } = useLang();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement | null>(null);
 
@@ -68,7 +72,7 @@ export default function Navbar() {
                   }`}
                 >
                   <span className="relative">
-                    {item.title}
+                    {t(item.tKey)}
                     {isActive(item.path) && (
                       <motion.span
                         layoutId="active-underline"
@@ -82,16 +86,20 @@ export default function Navbar() {
             ))}
           </ul>
 
-          {/* Right: Mobile toggle */}
-          <button
-            onClick={() => setIsMenuOpen((v) => !v)}
-            className="md:hidden inline-flex items-center justify-center rounded-xl p-2 text-[var(--text-primary)] hover:bg-[var(--surface-overlay)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/50"
-            aria-label="Toggle menu"
-            aria-expanded={isMenuOpen}
-            aria-controls="mobile-menu"
-          >
-            {isMenuOpen ? <X /> : <Menu />}
-          </button>
+          {/* Right: Theme toggle (desktop) + Mobile hamburger */}
+          <div className="flex items-center gap-1">
+            <LangToggle />
+            <ThemeToggle />
+            <button
+              onClick={() => setIsMenuOpen((v) => !v)}
+              className="md:hidden inline-flex items-center justify-center rounded-xl p-2 text-[var(--text-primary)] hover:bg-[var(--surface-overlay)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/50"
+              aria-label="Toggle menu"
+              aria-expanded={isMenuOpen}
+              aria-controls="mobile-menu"
+            >
+              {isMenuOpen ? <X /> : <Menu />}
+            </button>
+          </div>
         </div>
 
         {/* Click-outside backdrop */}
@@ -135,7 +143,7 @@ export default function Navbar() {
                             : "text-[var(--text-primary)] hover:bg-[var(--surface-overlay)]"
                         }`}
                       >
-                        {item.title}
+                        {t(item.tKey)}
                       </Link>
                     </li>
                   ))}

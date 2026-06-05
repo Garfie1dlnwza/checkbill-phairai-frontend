@@ -3,6 +3,7 @@ import { useEffect, useState, useRef } from "react";
 import { toBlob } from "html-to-image";
 import { getColor } from "@/constants/color";
 import { Share2 } from "lucide-react";
+import { useLang } from "@/components/LanguageProvider";
 
 const STORAGE_KEY = process.env.NEXT_PUBLIC_STORAGE_KEY;
 const DIVIDER_KEY = process.env.NEXT_PUBLIC_DIVIDER_KEY;
@@ -68,6 +69,7 @@ export default function ColorStyle({
   const [isPrinting, setIsPrinting] = useState(printMode);
   const [printedSections, setPrintedSections] = useState<Set<string>>(new Set());
   const [currentPrintLine, setCurrentPrintLine] = useState(0);
+  const { t } = useLang();
   const [showCutter, setShowCutter] = useState(false);
   const [isFullyRendered, setIsFullyRendered] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
@@ -190,7 +192,7 @@ export default function ColorStyle({
       const file = new File([blob], filename, { type: "image/png" });
 
       if (navigator.canShare?.({ files: [file] })) {
-        await navigator.share({ files: [file], title: "สรุปบิล" });
+        await navigator.share({ files: [file], title: t("receipt.shareTitle") });
       } else {
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
@@ -309,7 +311,7 @@ export default function ColorStyle({
                       : "opacity-0"
                   }`}
                 >
-                  <span className="flex-shrink-0">หารกับ:</span>
+                  <span className="flex-shrink-0">{t("receipt.shareWithLabel")}</span>
                   {item.shareWith.length > 0 ? (
                     item.shareWith.map((name) => (
                       <span
@@ -322,7 +324,7 @@ export default function ColorStyle({
                       </span>
                     ))
                   ) : (
-                    <span className="text-xs text-neutral-400">ไม่มีคนหาร</span>
+                    <span className="text-xs text-neutral-400">{t("receipt.noDivider")}</span>
                   )}
                 </div>
               </div>
@@ -338,7 +340,7 @@ export default function ColorStyle({
             }`}
           >
             <div className="flex justify-between text-base sm:text-lg font-semibold">
-              <span>ยอดรวมทั้งหมด</span>
+              <span>{t("receipt.grandTotal")}</span>
               <span>฿{totalBill.toLocaleString()}</span>
             </div>
             <div className="flex justify-between text-xs sm:text-sm text-neutral-600">
@@ -351,7 +353,7 @@ export default function ColorStyle({
               </span>
             </div>
             <div className="flex justify-between font-bold text-green-700 text-base sm:text-lg">
-              <span>รวมทั้งหมด</span>
+              <span>{t("receipt.totalAll")}</span>
               <span>
                 ฿
                 {(totalBill + totalVat).toLocaleString(undefined, {
@@ -422,7 +424,7 @@ export default function ColorStyle({
                     }}
                   />
                   <p className="text-xs sm:text-sm text-neutral-500 mt-2">
-                    สแกน QR Code เพื่อชำระเงิน
+                    {t("receipt.qrScan")}
                   </p>
                 </div>
               )}
@@ -436,7 +438,7 @@ export default function ColorStyle({
                           : "opacity-0"
                       }`}
                     >
-                      <span className="text-neutral-600">ธนาคาร:</span>
+                      <span className="text-neutral-600">{t("receipt.bank")}</span>
                       <span className="font-semibold">{paymentInfo.bankName}</span>
                     </div>
                   )}
@@ -448,7 +450,7 @@ export default function ColorStyle({
                           : "opacity-0"
                       }`}
                     >
-                      <span className="text-neutral-600">เลขบัญชี:</span>
+                      <span className="text-neutral-600">{t("receipt.accountNumber")}</span>
                       <span className="font-mono font-semibold">
                         {paymentInfo.accountNumber}
                       </span>
@@ -462,7 +464,7 @@ export default function ColorStyle({
                           : "opacity-0"
                       }`}
                     >
-                      <span className="text-neutral-600">ชื่อบัญชี:</span>
+                      <span className="text-neutral-600">{t("receipt.accountName")}</span>
                       <span className="font-semibold">
                         {paymentInfo.accountName}
                       </span>
@@ -508,7 +510,7 @@ export default function ColorStyle({
                 ? "opacity-50 cursor-not-allowed"
                 : "hover:bg-neutral-200"
             }`}
-            aria-label="แชร์รูปใบเสร็จ"
+            aria-label={t("receipt.ariaShare")}
           >
             <Share2
               size={16}
@@ -516,10 +518,10 @@ export default function ColorStyle({
             />
             <span className="text-sm sm:text-base">
               {isExporting
-                ? "กำลังเตรียม..."
+                ? t("receipt.preparing")
                 : !isFullyRendered
-                ? "กำลังโหลด..."
-                : "แชร์รูป"}
+                ? t("receipt.loading")
+                : t("receipt.shareBtn")}
             </span>
           </button>
         </div>

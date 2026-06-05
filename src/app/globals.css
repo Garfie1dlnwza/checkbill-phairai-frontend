@@ -1,22 +1,38 @@
 @import "tailwindcss";
 
-:root {
-  /* Surfaces — deep warm slate */
+/* ── Dark theme (default) ─────────────────────────────── */
+:root,
+[data-theme="dark"] {
   --surface-base:    oklch(0.11  0.012 55);
   --surface-raised:  oklch(0.165 0.012 55);
   --surface-overlay: oklch(0.21  0.012 55);
   --surface-subtle:  oklch(0.235 0.012 55);
   --surface-border:  oklch(0.27  0.012 55);
 
-  /* Accent — warm amber */
   --accent:       oklch(0.77 0.18 62);
   --accent-hover: oklch(0.83 0.15 62);
   --on-accent:    oklch(0.11 0.02 55);
 
-  /* Text */
   --text-primary:   oklch(0.94 0.01  55);
   --text-secondary: oklch(0.67 0.012 55);
   --text-muted:     oklch(0.46 0.01  55);
+}
+
+/* ── Light theme ──────────────────────────────────────── */
+[data-theme="light"] {
+  --surface-base:    oklch(0.97 0.008 70);
+  --surface-raised:  oklch(1.00 0.003 70);
+  --surface-overlay: oklch(0.93 0.010 70);
+  --surface-subtle:  oklch(0.89 0.012 70);
+  --surface-border:  oklch(0.82 0.015 70);
+
+  --accent:       oklch(0.52 0.175 62);
+  --accent-hover: oklch(0.46 0.175 62);
+  --on-accent:    oklch(0.99 0.003 70);
+
+  --text-primary:   oklch(0.13 0.015 55);
+  --text-secondary: oklch(0.35 0.012 55);
+  --text-muted:     oklch(0.50 0.010 55);
 }
 
 /* Hide number input arrows for Chrome, Safari, Edge, Opera */
@@ -39,4 +55,5 @@ input[type="checkbox"] {
 body {
   background-color: var(--surface-base);
   color: var(--text-primary);
+  transition: background-color 0.2s ease, color 0.2s ease;
 }

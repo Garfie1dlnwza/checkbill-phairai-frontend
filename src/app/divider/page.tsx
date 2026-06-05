@@ -1,8 +1,9 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus,  Users, ChevronDown, ChevronUp } from "lucide-react";
+import { Plus, Users, ChevronDown, ChevronUp } from "lucide-react";
 import { Item } from "@/controllers/ListItem.controller";
+import { useLang } from "@/components/LanguageProvider";
 import BadgeDivider from "@/components/BadgeDivider";
 import ShowDetailCard from "@/components/Divider/ShowDetailCard";
 
@@ -11,6 +12,7 @@ const STORAGE_KEY = process.env.NEXT_PUBLIC_STORAGE_KEY;
 const VAT_RATE = 0.07; // 7%
 
 export default function DividerPage() {
+  const { t } = useLang();
   const [persons, setPersons] = useState<string[]>([]);
   const [input, setInput] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -87,11 +89,11 @@ export default function DividerPage() {
   const handleAdd = () => {
     const name = input.trim();
     if (!name) {
-      setError("กรุณาใส่ชื่อ");
+      setError(t("divider.errorEmpty"));
       return;
     }
     if (persons.includes(name)) {
-      setError("มีชื่อนี้อยู่แล้ว");
+      setError(t("divider.errorDuplicate"));
       return;
     }
     setPersons([...persons, name]);
@@ -121,13 +123,13 @@ export default function DividerPage() {
     <div className="min-h-screen flex justify-center items-start py-12 sm:py-16 px-4">
       <div className="relative border border-[var(--surface-border)] rounded-2xl max-w-2xl w-full mx-auto p-6 sm:p-8 bg-[var(--surface-raised)] shadow-2xl">
         <h1 className="text-4xl text-center font-bold text-white mb-4">
-          คนหาร
+          {t("divider.title")}
         </h1>
         <div className="mb-4">
           <div className="flex items-center gap-2">
             <input
               type="text"
-              placeholder="ใส่ชื่อ..."
+              placeholder={t("divider.placeholder")}
               className="flex-grow p-3 bg-[var(--surface-overlay)] border border-[var(--surface-border)] rounded-lg text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/50 transition-all"
               value={input}
               onChange={handleInputChange}
@@ -138,7 +140,7 @@ export default function DividerPage() {
             <button
               className="flex-shrink-0 p-3 bg-[var(--accent)] rounded-lg hover:bg-[var(--accent-hover)] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               onClick={handleAdd}
-              aria-label="เพิ่มสมาชิก"
+              aria-label={t("divider.addMember")}
               disabled={!input.trim()}
             >
               <Plus size={24} className="text-[var(--on-accent)]" />
@@ -148,7 +150,7 @@ export default function DividerPage() {
         </div>
         <div className="mt-8">
           <h2 className="text-lg font-semibold text-[var(--text-secondary)] mb-4">
-            สมาชิก ({persons.length})
+            {t("divider.memberCount")} ({persons.length})
           </h2>
           <div className="flex flex-wrap gap-2">
             <AnimatePresence>
@@ -175,7 +177,7 @@ export default function DividerPage() {
                 >
                   <Users className="mx-auto text-[var(--text-muted)]" size={40} />
                   <p className="text-[var(--text-secondary)] mt-4">
-                    ยังไม่มีสมาชิก
+                    {t("divider.empty")}
                   </p>
                 </motion.div>
               )}
@@ -187,7 +189,7 @@ export default function DividerPage() {
         {persons.length > 0 && (
           <div className="mt-8">
             <h2 className="text-lg font-semibold text-[var(--text-secondary)] mb-2">
-              สรุปยอดจ่ายแต่ละคน
+              {t("divider.summaryTitle")}
             </h2>
             <div className="flex flex-col gap-2">
               {persons.map((name) => (
@@ -229,7 +231,7 @@ export default function DividerPage() {
               ))}
             </div>
             <p className="text-xs text-[var(--text-muted)] mt-2 text-center">
-              *หมายเหตุ: ระบบจะบันทึกข้อมูลชื่อสมาชิกไว้ในเครื่องของคุณเท่านั้น
+              {t("divider.note")}
             </p>
           </div>
         )}

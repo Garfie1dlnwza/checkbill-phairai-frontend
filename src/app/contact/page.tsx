@@ -1,8 +1,10 @@
 "use client";
 
 import { Github, Linkedin, Mail, Instagram } from "lucide-react";
+import { useLang } from "@/components/LanguageProvider";
 
 export default function ContactPage() {
+  const { t } = useLang();
   return (
     <div className="min-h-screen flex flex-col justify-center items-center px-4 sm:px-6 lg:px-8 py-8 sm:py-16">
       <div className="relative max-w-sm sm:max-w-lg w-full">
@@ -17,9 +19,9 @@ export default function ContactPage() {
                 className="w-24 h-24 sm:w-32 sm:h-32 lg:w-40 lg:h-40 rounded-full object-cover"
               />
             </div>
-            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-[var(--text-primary)]">เกี่ยวกับเว็บไซต์</h1>
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-[var(--text-primary)]">{t("contact.title")}</h1>
             <p className="text-[var(--text-secondary)] text-sm sm:text-base leading-relaxed px-2">
-              เว็บไซต์นี้จัดทำขึ้นเพื่อช่วยในการหารค่าเหล้าและค่าอาหารในกลุ่มเพื่อน
+              {t("contact.description")}
             </p>
           </div>
 
@@ -27,7 +29,7 @@ export default function ContactPage() {
           <div className="space-y-2">
             <h2 className="text-base sm:text-lg font-semibold text-[var(--text-primary)] mb-2 sm:mb-3 flex items-center gap-2">
               <div className="w-1 h-4 bg-[var(--accent)] rounded-full"></div>
-              ผู้พัฒนา
+              {t("contact.developer")}
             </h2>
             <p className="text-[var(--text-secondary)] text-sm sm:text-base pl-3">Rawipon Ponsarutwanit</p>
           </div>
@@ -36,7 +38,7 @@ export default function ContactPage() {
           <div className="space-y-3">
             <h3 className="text-base sm:text-lg font-semibold text-[var(--text-primary)] flex items-center gap-2">
               <div className="w-1 h-4 bg-[var(--accent)] rounded-full"></div>
-              ติดต่อ
+              {t("contact.contact")}
             </h3>
 
             <div className="space-y-2 pl-3">
@@ -109,10 +111,10 @@ export default function ContactPage() {
 
         {/* Footer note */}
         <p className="text-center text-[var(--text-muted)] text-xs mt-4 px-2">
-          © 2024 Rawipon Ponsarutwanit. All rights reserved.
+          {t("contact.footer")}
           <br className="hidden sm:block" />
           <span className="sm:hidden"> </span>
-          This website is not affiliated with any official entities.
+          {t("contact.footerSub")}
         </p>
       </div>
     </div>

@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import InputItem from "@/components/Form/InputItem";
 import { X, Plus, Check } from "lucide-react";
 import { getColor } from "@/constants/color";
+import { useLang } from "@/components/LanguageProvider";
 import CheckBox from "@/components/Custom/CheckBox";
 
 const DIVIDER_KEY = process.env.NEXT_PUBLIC_DIVIDER_KEY;
@@ -39,6 +40,7 @@ export default function CardCreateItem({
   const [dividerError, setDividerError] = useState<string>("");
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [includeVat, setIncludeVat] = useState(false);
+  const { t } = useLang();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -73,17 +75,17 @@ export default function CardCreateItem({
     const newErrors: { [key: string]: string } = {};
 
     if (!name.trim()) {
-      newErrors.name = "กรุณาใส่ชื่อเมนู";
+      newErrors.name = t("card.errorName");
     }
 
     const qtyNum = Number(qty);
     if (!qty.trim() || isNaN(qtyNum) || qtyNum <= 0) {
-      newErrors.qty = "จำนวนต้องเป็นตัวเลขที่มากกว่า 0";
+      newErrors.qty = t("card.errorQty");
     }
 
     const priceNum = Number(price);
     if (!price.trim() || isNaN(priceNum) || priceNum < 0) {
-      newErrors.price = "ราคาต้องเป็นตัวเลขที่มากกว่าหรือเท่ากับ 0";
+      newErrors.price = t("card.errorPrice");
     }
 
     setErrors(newErrors);
@@ -128,11 +130,11 @@ export default function CardCreateItem({
     if (!DIVIDER_KEY) return;
     const personName = inputDivider.trim();
     if (!personName) {
-      setDividerError("กรุณาใส่ชื่อ");
+      setDividerError(t("card.errorDividerEmpty"));
       return;
     }
     if (dividerPersons.includes(personName)) {
-      setDividerError("มีชื่อนี้อยู่แล้ว");
+      setDividerError(t("card.errorDividerDuplicate"));
       return;
     }
     const updated = [...dividerPersons, personName];
@@ -170,7 +172,7 @@ export default function CardCreateItem({
         {/* Header */}
         <div className="flex items-center justify-between p-4 sm:p-6 border-b border-neutral-800 flex-shrink-0">
           <h2 className="text-lg sm:text-xl font-semibold text-white">
-            {initialData ? "แก้ไขรายการ" : "เพิ่มรายการใหม่"}
+            {initialData ? t("card.titleEdit") : t("card.titleAdd")}
           </h2>
           <button
             onClick={onClose}
@@ -189,11 +191,11 @@ export default function CardCreateItem({
                 <InputItem
                   label={
                     <>
-                      ชื่อเมนู
-                      <span className="text-red-400 ml-1 text-xs">*</span>
+                      {t("card.menuName")}
+                      <span className="text-red-400 ml-1 text-xs">{t("card.required")}</span>
                     </>
                   }
-                  placeholder="เช่น ข้าวผัด, ส้มตำ"
+                  placeholder={t("card.menuPlaceholder")}
                   type="Text"
                   value={name}
                   onChange={(e) => {
@@ -216,8 +218,8 @@ export default function CardCreateItem({
                 <InputItem
                   label={
                     <>
-                      จำนวน
-                      <span className="text-red-400 ml-1 text-xs">*</span>
+                      {t("card.qty")}
+                      <span className="text-red-400 ml-1 text-xs">{t("card.required")}</span>
                     </>
                   }
                   placeholder="1"
@@ -241,8 +243,8 @@ export default function CardCreateItem({
                 <InputItem
                   label={
                     <>
-                      ราคา (บาท)
-                      <span className="text-red-400 ml-1 text-xs">*</span>
+                      {t("card.price")}
+                      <span className="text-red-400 ml-1 text-xs">{t("card.required")}</span>
                     </>
                   }
                   placeholder="0"
@@ -272,7 +274,7 @@ export default function CardCreateItem({
                 checked={includeVat}
                 onChange={setIncludeVat}
                 id="includeVat"
-                label="คิด VAT 7% สำหรับเมนูนี้"
+                label={t("card.includeVat")}
               />
             </div>
 
@@ -281,7 +283,7 @@ export default function CardCreateItem({
               <div className="space-y-4">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                   <label className="text-sm font-medium text-neutral-400">
-                    หารกับ ({dividerPersons.length} คน)
+                    {t("card.shareWith")} ({dividerPersons.length} {t("card.personCount")})
                   </label>
                   <button
                     onClick={() =>
@@ -292,8 +294,8 @@ export default function CardCreateItem({
                     className="text-xs px-3 py-1 rounded-full bg-neutral-800 text-neutral-300 hover:bg-neutral-700 hover:text-white transition-colors self-start sm:self-auto"
                   >
                     {shareWith.length === dividerPersons.length
-                      ? "ยกเลิกทั้งหมด"
-                      : "เลือกทั้งหมด"}
+                      ? t("card.deselectAll")
+                      : t("card.selectAll")}
                   </button>
                 </div>
 
@@ -327,7 +329,7 @@ export default function CardCreateItem({
 
                 {/* Summary */}
                 <div className="flex items-center text-xs text-neutral-500 px-1">
-                  <span>เลือกแล้ว: {shareWith.length} คน</span>
+                  <span>{t("card.selected")}: {shareWith.length} {t("card.personCount")}</span>
                 </div>
               </div>
             )}
@@ -335,12 +337,12 @@ export default function CardCreateItem({
             {/* Add Person */}
             <div className="space-y-3">
               <label className="block text-sm font-medium text-neutral-400">
-                เพิ่มคนหาร
+                {t("card.addDivider")}
               </label>
               <div className="flex flex-col sm:flex-row gap-2">
                 <input
                   type="text"
-                  placeholder="ชื่อ"
+                  placeholder={t("card.namePlaceholder")}
                   className="flex-1 px-4 py-3 border-b border-neutral-700 text-white placeholder-neutral-500 focus:outline-none transition-all bg-transparent"
                   value={inputDivider}
                   onChange={(e) => {
@@ -373,13 +375,13 @@ export default function CardCreateItem({
             {totalAmount > 0 && (
               <div className="flex flex-col gap-1 py-3 px-4 bg-neutral-800 rounded-lg border border-neutral-700">
                 <div className="flex justify-between items-center">
-                  <span className="text-neutral-400 text-sm">ยอดรวม</span>
+                  <span className="text-neutral-400 text-sm">{t("card.subtotal")}</span>
                   <span className="text-white font-semibold">
                     ฿{totalAmount.toLocaleString()}
                   </span>
                 </div>
                 <div className="flex justify-between items-center mt-1">
-                  <span className="text-neutral-400 text-xs">VAT 7%</span>
+                  <span className="text-neutral-400 text-xs">{t("card.vat")}</span>
                   <span className="text-yellow-400 font-semibold text-sm">
                     ฿
                     {vatAmount.toLocaleString(undefined, {
@@ -388,7 +390,7 @@ export default function CardCreateItem({
                   </span>
                 </div>
                 <div className="flex justify-between items-center mt-1">
-                  <span className="text-neutral-400 text-xs">รวมทั้งหมด</span>
+                  <span className="text-neutral-400 text-xs">{t("card.totalWithVat")}</span>
                   <span className="text-green-400 font-semibold text-sm">
                     ฿
                     {totalWithVat.toLocaleString(undefined, {
@@ -399,7 +401,7 @@ export default function CardCreateItem({
                 {shareWith.length > 0 && (
                   <div className="flex justify-between items-center mt-1">
                     <span className="text-neutral-400 text-xs">
-                      ตกคนละ (รวม VAT)
+                      {t("card.perPersonVat")}
                     </span>
                     <span className="text-emerald-400 font-semibold text-sm">
                       ฿
@@ -423,7 +425,7 @@ export default function CardCreateItem({
             onClick={onClose}
             className="flex-1 py-3 px-4 text-neutral-300 border border-neutral-700 rounded-lg hover:bg-neutral-800 hover:text-white transition-colors order-2 sm:order-1"
           >
-            ยกเลิก
+            {t("card.cancel")}
           </button>
           <button
             onClick={handleSave}
@@ -434,13 +436,13 @@ export default function CardCreateItem({
                 : "bg-neutral-800 text-neutral-500 cursor-not-allowed"
             }`}
           >
-            {initialData ? "บันทึกการแก้ไข" : "บันทึก"}
+            {initialData ? t("card.saveEdit") : t("card.save")}
           </button>
         </div>
 
         {/* Keyboard Shortcuts - Hide on mobile */}
         <div className="hidden sm:block px-6 pb-4 text-xs text-neutral-600 text-center">
-          ESC เพื่อปิด • CTRL+ENTER เพื่อบันทึก
+          {t("card.shortcut")}
         </div>
       </div>
     </div>

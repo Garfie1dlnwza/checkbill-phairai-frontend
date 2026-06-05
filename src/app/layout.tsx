@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import { Noto_Sans_Thai } from "next/font/google";
 import Navbar from "@/components/Layouts/Navbar";
 import Background from "@/components/Layouts/Background";
+import { ThemeProvider } from "@/components/ThemeProvider";
+import { LanguageProvider } from "@/components/LanguageProvider";
 import "./globals.css";
 
 const siteUrl =
@@ -60,7 +62,10 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#c07800",
+  themeColor: [
+    { media: "(prefers-color-scheme: dark)", color: "#c07800" },
+    { media: "(prefers-color-scheme: light)", color: "#f5ecd6" },
+  ],
   width: "device-width",
   initialScale: 1,
 };
@@ -78,16 +83,26 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="th">
+    <html lang="th" suppressHydrationWarning>
+      <head>
+        {/* Inline script runs before React hydrates — prevents theme flash */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme:light)').matches?'light':'dark');document.documentElement.setAttribute('data-theme',t)}catch(e){}})()`,
+          }}
+        />
+      </head>
       <body
         className={`${notoSansThai.variable} antialiased`}
-        style={{
-          fontFamily: "'Noto Sans Thai', sans-serif",
-        }}
+        style={{ fontFamily: "'Noto Sans Thai', sans-serif" }}
       >
-        <Background />
-        <Navbar />
-        {children}
+        <ThemeProvider>
+          <LanguageProvider>
+            <Background />
+            <Navbar />
+            {children}
+          </LanguageProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
