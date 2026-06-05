@@ -186,16 +186,16 @@ export default function ListItemPage() {
 
   return (
     <div className="min-h-screen flex justify-center items-start py-8 md:py-16 px-2 sm:px-4">
-      <div className="relative border border-white/20 rounded-2xl max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 bg-black/70 shadow-2xl backdrop-blur-lg z-10">
+      <div className="relative border border-[var(--surface-border)] rounded-2xl max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 bg-[var(--surface-raised)] shadow-2xl z-10">
         <div className="flex items-center justify-center mb-6 md:mb-8">
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white text-center">รายการอาหาร</h1>
         </div>
         
         <div className="flex flex-col sm:flex-row justify-between items-center sm:items-end gap-2 mb-4 md:mb-6">
-          <span className="text-base sm:text-lg lg:text-xl text-white/80 text-center sm:text-left">
+          <span className="text-base sm:text-lg lg:text-xl text-[var(--text-secondary)] text-center sm:text-left">
             จำนวนคนหาร: {personCount}
           </span>
-          <span className="text-lg sm:text-xl text-orange-300 font-bold text-center sm:text-right">
+          <span className="text-lg sm:text-xl text-[var(--accent)] font-bold text-center sm:text-right">
             รวม: {total.toLocaleString()} บาท
           </span>
         </div>
@@ -203,9 +203,9 @@ export default function ListItemPage() {
         {/* Mobile Card View */}
         <div className="block md:hidden mb-6">
           {rows.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 border border-white/10 bg-white/5 rounded-xl">
-              <ShoppingCart className="text-white/30 mb-4" size={48} />
-              <div className="text-white/60 text-lg">ยังไม่มีรายการ</div>
+            <div className="flex flex-col items-center justify-center py-12 border border-[var(--surface-border)] bg-[var(--surface-subtle)] rounded-xl">
+              <ShoppingCart className="text-[var(--text-muted)] mb-4" size={48} />
+              <div className="text-[var(--text-secondary)] text-lg">ยังไม่มีรายการ</div>
             </div>
           ) : (
             <div className="space-y-4">
@@ -234,11 +234,11 @@ export default function ListItemPage() {
                         stiffness: 300,
                         damping: 24,
                       }}
-                      className="border border-white/10 bg-white/5 rounded-xl p-4 space-y-3"
+                      className="border border-[var(--surface-border)] bg-[var(--surface-subtle)] rounded-xl p-4 space-y-3"
                     >
                       {/* Header */}
                       <div className="flex justify-between items-start">
-                        <h3 className="text-lg font-semibold text-white">{row.name}</h3>
+                        <h3 className="text-lg font-semibold text-[var(--text-primary)]">{row.name}</h3>
                         <div className="flex gap-2">
                           <button
                             onClick={() => setEditRow(row)}
@@ -260,19 +260,19 @@ export default function ListItemPage() {
                       {/* Details Grid */}
                       <div className="grid grid-cols-2 gap-3 text-sm">
                         <div>
-                          <span className="text-white/60">จำนวน:</span>
-                          <span className="text-white font-semibold ml-2">{row.qty}</span>
+                          <span className="text-[var(--text-secondary)]">จำนวน:</span>
+                          <span className="text-[var(--text-primary)] font-semibold ml-2">{row.qty}</span>
                         </div>
                         <div>
-                          <span className="text-white/60">ราคา:</span>
-                          <span className="text-white font-semibold ml-2">{row.price}</span>
+                          <span className="text-[var(--text-secondary)]">ราคา:</span>
+                          <span className="text-[var(--text-primary)] font-semibold ml-2">{row.price}</span>
                         </div>
                         <div>
-                          <span className="text-white/60">รวม:</span>
-                          <span className="text-white font-semibold ml-2">{sum.toLocaleString()}</span>
+                          <span className="text-[var(--text-secondary)]">รวม:</span>
+                          <span className="text-[var(--text-primary)] font-semibold ml-2">{sum.toLocaleString()}</span>
                         </div>
                         <div>
-                          <span className="text-white/60">VAT ต่อคน:</span>
+                          <span className="text-[var(--text-secondary)]">VAT ต่อคน:</span>
                           <span className="text-yellow-400 font-semibold ml-2">
                             {row.shareWith.length > 0
                               ? vatPerPerson.toLocaleString(undefined, {
@@ -284,9 +284,9 @@ export default function ListItemPage() {
                       </div>
 
                       {/* Per Person */}
-                      <div className="border-t border-white/10 pt-3">
+                      <div className="border-t border-[var(--surface-border)] pt-3">
                         <div className="text-center">
-                          <span className="text-white/60 text-sm">ตกคนละ:</span>
+                          <span className="text-[var(--text-secondary)] text-sm">ตกคนละ:</span>
                           <span className="text-green-400 font-bold text-lg ml-2">
                             {row.shareWith.length > 0
                               ? perPersonWithVat.toLocaleString(undefined, {
@@ -300,7 +300,7 @@ export default function ListItemPage() {
 
                       {/* Share With */}
                       <div>
-                        <div className="text-white/60 text-sm mb-2">คนหาร:</div>
+                        <div className="text-[var(--text-secondary)] text-sm mb-2">คนหาร:</div>
                         <div className="flex flex-wrap gap-2">
                           {row.shareWith.length > 0 ? (
                             row.shareWith.map((name) => (
@@ -313,7 +313,7 @@ export default function ListItemPage() {
                               />
                             ))
                           ) : (
-                            <span className="text-white/50">—</span>
+                            <span className="text-[var(--text-muted)]">—</span>
                           )}
                         </div>
                       </div>
@@ -326,16 +326,16 @@ export default function ListItemPage() {
         </div>
 
         {/* Desktop Table View */}
-        <div className="hidden md:block overflow-x-auto rounded-xl border border-white/10 bg-white/5 mb-6">
+        <div className="hidden md:block overflow-x-auto rounded-xl border border-[var(--surface-border)] bg-[var(--surface-subtle)] mb-6">
           {rows.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12">
-              <ShoppingCart className="text-white/30 mb-4" size={48} />
-              <div className="text-white/60 text-lg">ยังไม่มีรายการ</div>
+              <ShoppingCart className="text-[var(--text-muted)] mb-4" size={48} />
+              <div className="text-[var(--text-secondary)] text-lg">ยังไม่มีรายการ</div>
             </div>
           ) : (
-            <table className="w-full text-white">
+            <table className="w-full text-[var(--text-primary)]">
               <thead>
-                <tr className="border-b border-white/20 bg-white/10">
+                <tr className="border-b border-[var(--surface-border)] bg-[var(--surface-overlay)]">
                   <th className="py-3 px-2 lg:px-4 text-sm lg:text-lg font-semibold text-center min-w-[100px]">
                     เมนู
                   </th>
@@ -387,7 +387,7 @@ export default function ListItemPage() {
                           stiffness: 300,
                           damping: 24,
                         }}
-                        className="hover:bg-white/5 transition-colors border-b border-white/10"
+                        className="hover:bg-[var(--surface-overlay)] transition-colors border-b border-[var(--surface-border)]"
                       >
                         <td className="py-3 px-2 lg:px-4 text-center font-semibold text-sm lg:text-base">
                           <div className="truncate max-w-[100px] lg:max-w-none" title={row.name}>
@@ -431,7 +431,7 @@ export default function ListItemPage() {
                                 />
                               ))
                             ) : (
-                              <span className="text-white/50">—</span>
+                              <span className="text-[var(--text-muted)]">—</span>
                             )}
                           </div>
                         </td>
@@ -466,9 +466,9 @@ export default function ListItemPage() {
         <div className="flex flex-col sm:flex-row justify-center gap-4 mt-4">
           <button
             onClick={() => setShowCreate(true)}
-            className="flex items-center justify-center gap-2 px-4 sm:px-6 py-3 rounded-xl bg-white text-black font-semibold shadow-lg hover:scale-105 transition-transform text-sm sm:text-base"
+            className="flex items-center justify-center gap-2 px-4 sm:px-6 py-3 rounded-xl bg-[var(--accent)] text-[var(--on-accent)] font-semibold shadow-lg hover:bg-[var(--accent-hover)] transition-colors text-sm sm:text-base"
           >
-            <Plus size={20} color="#000000" />
+            <Plus size={20} />
             เพิ่มรายการ
           </button>
           

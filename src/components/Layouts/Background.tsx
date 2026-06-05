@@ -1,7 +1,7 @@
 export default function Background() {
   return (
     <div
-      className="fixed inset-0 -z-10 opacity-10"
+      className="fixed inset-0 -z-10 opacity-[0.04]"
       style={{
         backgroundImage: "url('/logo_checkbill_phairai.png')",
         backgroundRepeat: "repeat",

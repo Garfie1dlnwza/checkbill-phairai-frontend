@@ -1,8 +1,22 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Surfaces — deep warm slate */
+  --surface-base:    oklch(0.11  0.012 55);
+  --surface-raised:  oklch(0.165 0.012 55);
+  --surface-overlay: oklch(0.21  0.012 55);
+  --surface-subtle:  oklch(0.235 0.012 55);
+  --surface-border:  oklch(0.27  0.012 55);
+
+  /* Accent — warm amber */
+  --accent:       oklch(0.77 0.18 62);
+  --accent-hover: oklch(0.83 0.15 62);
+  --on-accent:    oklch(0.11 0.02 55);
+
+  /* Text */
+  --text-primary:   oklch(0.94 0.01  55);
+  --text-secondary: oklch(0.67 0.012 55);
+  --text-muted:     oklch(0.46 0.01  55);
 }
 
 /* Hide number input arrows for Chrome, Safari, Edge, Opera */
@@ -19,20 +33,10 @@ input[type="checkbox"] {
   border-radius: 9999px;
   width: 1rem;
   height: 1rem;
-  accent-color: #018127; /* emerald-500 */
-}
-
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  accent-color: var(--accent);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--surface-base);
+  color: var(--text-primary);
 }
-

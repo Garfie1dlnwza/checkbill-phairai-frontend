@@ -87,11 +87,11 @@ export default function DividerPage() {
   const handleAdd = () => {
     const name = input.trim();
     if (!name) {
-      setError("Name cannot be empty.");
+      setError("กรุณาใส่ชื่อ");
       return;
     }
     if (persons.includes(name)) {
-      setError("This person has already been added.");
+      setError("มีชื่อนี้อยู่แล้ว");
       return;
     }
     setPersons([...persons, name]);
@@ -119,7 +119,7 @@ export default function DividerPage() {
 
   return (
     <div className="min-h-screen flex justify-center items-start py-12 sm:py-16 px-4">
-      <div className="relative border border-white/20 rounded-2xl max-w-2xl w-full mx-auto p-6 sm:p-8 bg-black/70 shadow-2xl backdrop-blur-xl">
+      <div className="relative border border-[var(--surface-border)] rounded-2xl max-w-2xl w-full mx-auto p-6 sm:p-8 bg-[var(--surface-raised)] shadow-2xl">
         <h1 className="text-4xl text-center font-bold text-white mb-4">
           คนหาร
         </h1>
@@ -127,8 +127,8 @@ export default function DividerPage() {
           <div className="flex items-center gap-2">
             <input
               type="text"
-              placeholder="Enter a name..."
-              className="flex-grow p-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-white-500 transition-all"
+              placeholder="ใส่ชื่อ..."
+              className="flex-grow p-3 bg-[var(--surface-overlay)] border border-[var(--surface-border)] rounded-lg text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/50 transition-all"
               value={input}
               onChange={handleInputChange}
               onKeyDown={(e) => {
@@ -136,18 +136,18 @@ export default function DividerPage() {
               }}
             />
             <button
-              className="flex-shrink-0 p-3 bg-white rounded-lg hover:bg-white-500 transition-colors disabled:bg-gray-800 disabled:cursor-not-allowed"
+              className="flex-shrink-0 p-3 bg-[var(--accent)] rounded-lg hover:bg-[var(--accent-hover)] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               onClick={handleAdd}
-              aria-label="Add person"
+              aria-label="เพิ่มสมาชิก"
               disabled={!input.trim()}
             >
-              <Plus size={24} color="#000000" />
+              <Plus size={24} className="text-[var(--on-accent)]" />
             </button>
           </div>
           {error && <p className="text-red-400 text-sm mt-2">{error}</p>}
         </div>
         <div className="mt-8">
-          <h2 className="text-lg font-semibold text-white/80 mb-4">
+          <h2 className="text-lg font-semibold text-[var(--text-secondary)] mb-4">
             สมาชิก ({persons.length})
           </h2>
           <div className="flex flex-wrap gap-2">
@@ -171,11 +171,11 @@ export default function DividerPage() {
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1, transition: { delay: 0.2 } }}
-                  className="text-center py-10 px-4 border-2 border-dashed border-white/20 rounded-lg w-full"
+                  className="text-center py-10 px-4 border-2 border-dashed border-[var(--surface-border)] rounded-lg w-full"
                 >
-                  <Users className="mx-auto text-white/30" size={40} />
-                  <p className="text-white/60 mt-4">
-                    The group is currently empty.
+                  <Users className="mx-auto text-[var(--text-muted)]" size={40} />
+                  <p className="text-[var(--text-secondary)] mt-4">
+                    ยังไม่มีสมาชิก
                   </p>
                 </motion.div>
               )}
@@ -186,22 +186,22 @@ export default function DividerPage() {
         {/* แสดงจำนวนเงินที่แต่ละคนต้องจ่าย */}
         {persons.length > 0 && (
           <div className="mt-8">
-            <h2 className="text-lg font-semibold text-white/80 mb-2">
+            <h2 className="text-lg font-semibold text-[var(--text-secondary)] mb-2">
               สรุปยอดจ่ายแต่ละคน
             </h2>
             <div className="flex flex-col gap-2">
               {persons.map((name) => (
                 <div key={name}>
                   <div
-                    className="flex justify-between items-center px-4 py-2 rounded-lg font-medium text-sm bg-white/5 cursor-pointer"
+                    className="flex justify-between items-center px-4 py-2 rounded-lg font-medium text-sm bg-[var(--surface-subtle)] cursor-pointer"
                     onClick={() => handleTogglePerson(name)}
                   >
                     <div className="flex items-center gap-2">
                       <BadgeDivider name={name} handleDelete={() => handleRemove(name)} />
                       {selectedPersons.includes(name) ? (
-                        <ChevronUp size={18} className="text-white/60" />
+                        <ChevronUp size={18} className="text-[var(--text-secondary)]" />
                       ) : (
-                        <ChevronDown size={18} className="text-white/60" />
+                        <ChevronDown size={18} className="text-[var(--text-secondary)]" />
                       )}
                     </div>
                     <span className="text-emerald-400 font-semibold">
@@ -228,7 +228,7 @@ export default function DividerPage() {
                 </div>
               ))}
             </div>
-            <p className="text-xs text-white/50 mt-2 text-center">
+            <p className="text-xs text-[var(--text-muted)] mt-2 text-center">
               *หมายเหตุ: ระบบจะบันทึกข้อมูลชื่อสมาชิกไว้ในเครื่องของคุณเท่านั้น
             </p>
           </div>

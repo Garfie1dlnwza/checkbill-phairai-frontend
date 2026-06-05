@@ -159,17 +159,17 @@ export default function PaymentSettingsModal({
   return (
     <>
       <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-sm">
-        <div className="bg-black/90 backdrop-blur-xl border border-white/20 rounded-t-2xl sm:rounded-2xl p-5 sm:p-6 w-full sm:max-w-lg sm:mx-4 max-h-[90vh] overflow-y-auto shadow-2xl">
+        <div className="bg-[var(--surface-raised)] border border-[var(--surface-border)] rounded-t-2xl sm:rounded-2xl p-5 sm:p-6 w-full sm:max-w-lg sm:mx-4 max-h-[90vh] overflow-y-auto shadow-2xl">
           {/* Header */}
           <div className="flex items-center gap-3 mb-6">
-            <div className="p-2 bg-white/10 rounded-lg">
-              <Settings className="w-5 h-5 text-white" />
+            <div className="p-2 bg-[var(--surface-overlay)] rounded-lg">
+              <Settings className="w-5 h-5 text-[var(--accent)]" />
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-white">
+              <h3 className="text-lg font-semibold text-[var(--text-primary)]">
                 ตั้งค่าการชำระเงิน
               </h3>
-              <p className="text-xs text-white/60">
+              <p className="text-xs text-[var(--text-secondary)]">
                 เลือกวิธีการชำระเงินที่ต้องการแสดง
               </p>
             </div>
@@ -178,7 +178,7 @@ export default function PaymentSettingsModal({
           <div className="space-y-6">
             {/* Payment Type Selection */}
             <div>
-              <label className="block text-sm font-medium text-white/80 mb-3">
+              <label className="block text-sm font-medium text-[var(--text-secondary)] mb-3">
                 ประเภทการชำระเงิน
               </label>
               <div className="space-y-3">
@@ -203,8 +203,8 @@ export default function PaymentSettingsModal({
                     key={option.value}
                     className={`flex items-center gap-3 p-3 border rounded-xl cursor-pointer transition-all duration-200 ${
                       formData.type === option.value
-                        ? "border-white bg-white/10"
-                        : "border-white/20 hover:border-white/40 hover:bg-white/5"
+                        ? "border-[var(--accent)] bg-[var(--accent)]/10"
+                        : "border-[var(--surface-border)] hover:border-[var(--accent)]/40 hover:bg-[var(--surface-overlay)]"
                     }`}
                   >
                     <input
@@ -223,16 +223,16 @@ export default function PaymentSettingsModal({
                     <div
                       className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-colors ${
                         formData.type === option.value
-                          ? "border-white bg-white"
-                          : "border-white/40"
+                          ? "border-[var(--accent)] bg-[var(--accent)]"
+                          : "border-[var(--surface-border)]"
                       }`}
                     >
                       {formData.type === option.value && (
-                        <div className="w-1.5 h-1.5 rounded-full bg-black" />
+                        <div className="w-1.5 h-1.5 rounded-full bg-[var(--on-accent)]" />
                       )}
                     </div>
                     {option.icon}
-                    <span className="text-white text-sm flex-1">
+                    <span className="text-[var(--text-primary)] text-sm flex-1">
                       {option.label}
                     </span>
                   </label>
@@ -243,7 +243,7 @@ export default function PaymentSettingsModal({
             {/* QR Code Upload */}
             {formData.type === "qr" && (
               <div className="space-y-4">
-                <label className="block text-sm font-medium text-white/80">
+                <label className="block text-sm font-medium text-[var(--text-secondary)]">
                   อัปโหลดรูป QR Code
                 </label>
 
@@ -259,7 +259,7 @@ export default function PaymentSettingsModal({
                       />
                       <button
                         onClick={removeQrCode}
-                        className="absolute -top-2 -right-2 w-6 h-6 bg-black text-white rounded-full flex items-center justify-center hover:bg-black/80 transition-colors shadow-lg"
+                        className="absolute -top-2 -right-2 w-6 h-6 bg-[var(--surface-base)] text-[var(--text-primary)] rounded-full flex items-center justify-center hover:bg-[var(--surface-overlay)] transition-colors shadow-lg"
                       >
                         <X size={12} />
                       </button>
@@ -267,12 +267,12 @@ export default function PaymentSettingsModal({
                     <div className="flex items-center gap-2 mt-2">
                       <button
                         onClick={openCropper}
-                        className="flex items-center gap-1 px-3 py-1 bg-white/10 hover:bg-white/20 rounded-lg text-xs text-white/70 hover:text-white transition-colors"
+                        className="flex items-center gap-1 px-3 py-1 bg-[var(--surface-overlay)] hover:bg-[var(--surface-subtle)] rounded-lg text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
                       >
                         <Crop size={12} />
                         ตัดแต่งรูป
                       </button>
-                      <p className="text-xs text-white/50">
+                      <p className="text-xs text-[var(--text-muted)]">
                         คลิกปุ่มด้านล่างเพื่อเปลี่ยนรูป
                       </p>
                     </div>
@@ -283,8 +283,8 @@ export default function PaymentSettingsModal({
                 <div
                   className={`relative border-2 border-dashed rounded-xl transition-all duration-200 ${
                     dragActive
-                      ? "border-white bg-white/10"
-                      : "border-white/30 hover:border-white/50"
+                      ? "border-[var(--accent)] bg-[var(--accent)]/10"
+                      : "border-[var(--surface-border)] hover:border-[var(--accent)]/50"
                   } ${isUploading ? "opacity-50 pointer-events-none" : ""}`}
                   onDragEnter={handleDrag}
                   onDragLeave={handleDrag}
@@ -305,21 +305,21 @@ export default function PaymentSettingsModal({
                       <>
                         <Loader2
                           size={32}
-                          className="text-white animate-spin mb-3"
+                          className="text-[var(--accent)] animate-spin mb-3"
                         />
-                        <span className="text-sm text-white/60">
+                        <span className="text-sm text-[var(--text-secondary)]">
                           กำลังอัปโหลด...
                         </span>
                       </>
                     ) : (
                       <>
-                        <div className="p-3 bg-white/10 rounded-xl mb-3">
-                          <Upload size={24} className="text-white/70" />
+                        <div className="p-3 bg-[var(--surface-overlay)] rounded-xl mb-3">
+                          <Upload size={24} className="text-[var(--text-secondary)]" />
                         </div>
-                        <span className="text-sm text-white font-medium mb-1">
+                        <span className="text-sm text-[var(--text-primary)] font-medium mb-1">
                           แตะเพื่อเลือกรูป หรือลากไฟล์มาวาง
                         </span>
-                        <span className="text-xs text-white/50">
+                        <span className="text-xs text-[var(--text-muted)]">
                           รองรับ JPG, PNG, WebP (ไม่เกิน 5MB)
                         </span>
                       </>
@@ -332,13 +332,13 @@ export default function PaymentSettingsModal({
             {/* Enhanced Bank Account Information */}
             {formData.type === "bank" && (
               <div className="space-y-4">
-                <label className="block text-sm font-medium text-white/80">
+                <label className="block text-sm font-medium text-[var(--text-secondary)]">
                   ข้อมูลบัญชีธนาคาร
                 </label>
 
                 <div className="grid gap-4">
                   <div>
-                    <label className="block text-xs font-medium text-white/60 mb-2">
+                    <label className="block text-xs font-medium text-[var(--text-muted)] mb-2">
                       ชื่อธนาคาร *
                     </label>
                     <input
@@ -348,12 +348,12 @@ export default function PaymentSettingsModal({
                       onChange={(e) =>
                         setFormData({ ...formData, bankName: e.target.value })
                       }
-                      className="w-full px-4 py-3 bg-black/50 border border-white/20 rounded-xl text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-white/50 transition-all duration-200"
+                      className="w-full px-4 py-3 bg-[var(--surface-overlay)] border border-[var(--surface-border)] rounded-xl text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/30 focus:border-[var(--accent)]/50 transition-all duration-200"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-medium text-white/60 mb-2">
+                    <label className="block text-xs font-medium text-[var(--text-muted)] mb-2">
                       เลขบัญชี *
                     </label>
                     <input
@@ -366,12 +366,12 @@ export default function PaymentSettingsModal({
                           accountNumber: e.target.value,
                         })
                       }
-                      className="w-full px-4 py-3 bg-black/50 border border-white/20 rounded-xl text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-white/50 transition-all duration-200"
+                      className="w-full px-4 py-3 bg-[var(--surface-overlay)] border border-[var(--surface-border)] rounded-xl text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/30 focus:border-[var(--accent)]/50 transition-all duration-200"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-medium text-white/60 mb-2">
+                    <label className="block text-xs font-medium text-[var(--text-muted)] mb-2">
                       ชื่อบัญชี *
                     </label>
                     <input
@@ -384,7 +384,7 @@ export default function PaymentSettingsModal({
                           accountName: e.target.value,
                         })
                       }
-                      className="w-full px-4 py-3 bg-black/50 border border-white/20 rounded-xl text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-white/50 transition-all duration-200"
+                      className="w-full px-4 py-3 bg-[var(--surface-overlay)] border border-[var(--surface-border)] rounded-xl text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/30 focus:border-[var(--accent)]/50 transition-all duration-200"
                     />
                   </div>
                 </div>
@@ -396,14 +396,14 @@ export default function PaymentSettingsModal({
           <div className="flex flex-col sm:flex-row gap-3 mt-8">
             <button
               onClick={onClose}
-              className="flex-1 py-3 px-4 text-white/80 border border-white/20 rounded-xl hover:bg-white/5 hover:border-white/40 transition-all duration-200 order-2 sm:order-1"
+              className="flex-1 py-3 px-4 text-[var(--text-secondary)] border border-[var(--surface-border)] rounded-xl hover:bg-[var(--surface-overlay)] hover:border-[var(--accent)]/30 transition-all duration-200 order-2 sm:order-1"
             >
               ยกเลิก
             </button>
             <button
               onClick={handleSave}
               disabled={isUploading || !isFormValid}
-              className="flex-1 py-3 px-4 bg-white text-black rounded-xl font-medium hover:bg-white/90 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed order-1 sm:order-2 shadow-lg"
+              className="flex-1 py-3 px-4 bg-[var(--accent)] text-[var(--on-accent)] rounded-xl font-medium hover:bg-[var(--accent-hover)] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed order-1 sm:order-2 shadow-lg"
             >
               {isUploading ? "กำลังอัปโหลด..." : "บันทึก"}
             </button>

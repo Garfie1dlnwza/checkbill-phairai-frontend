@@ -55,7 +55,7 @@ export default function Navbar() {
 
   return (
     <nav className="sticky top-4 z-20  mx-auto w-full max-w-2xl px-4">
-      <div className="backdrop-blur-xl border border-white/30 px-6 py-3 shadow-2xl rounded-2xl">
+      <div className="bg-[var(--surface-raised)] border border-[var(--surface-border)] px-6 py-3 shadow-2xl rounded-2xl">
         <div className="flex h-14 items-center justify-between px-4 md:px-6">
           {/* Center: Desktop nav */}
           <ul className="hidden md:flex items-center gap-x-6 mx-auto">
@@ -63,8 +63,8 @@ export default function Navbar() {
               <li key={item.path} className="relative">
                 <Link
                   href={item.path}
-                  className={`px-1 py-1 font-bold transition-colors hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 rounded-md ${
-                    isActive(item.path) ? "text-white" : "text-white/70"
+                  className={`px-1 py-1 font-bold transition-colors hover:text-[var(--text-primary)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/50 rounded-md ${
+                    isActive(item.path) ? "text-[var(--text-primary)]" : "text-[var(--text-secondary)]"
                   }`}
                 >
                   <span className="relative">
@@ -72,7 +72,7 @@ export default function Navbar() {
                     {isActive(item.path) && (
                       <motion.span
                         layoutId="active-underline"
-                        className="absolute inset-x-0 -bottom-1 h-0.5 rounded-full bg-white"
+                        className="absolute inset-x-0 -bottom-1 h-0.5 rounded-full bg-[var(--accent)]"
                         transition={{ type: "spring", stiffness: 400, damping: 30 }}
                       />
                     )}
@@ -85,7 +85,7 @@ export default function Navbar() {
           {/* Right: Mobile toggle */}
           <button
             onClick={() => setIsMenuOpen((v) => !v)}
-            className="md:hidden inline-flex items-center justify-center rounded-xl p-2 text-white/90 hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+            className="md:hidden inline-flex items-center justify-center rounded-xl p-2 text-[var(--text-primary)] hover:bg-[var(--surface-overlay)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/50"
             aria-label="Toggle menu"
             aria-expanded={isMenuOpen}
             aria-controls="mobile-menu"
@@ -121,7 +121,7 @@ export default function Navbar() {
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.2, ease: "easeInOut" }}
-              className="md:hidden overflow-hidden border-t border-white/15"
+              className="md:hidden overflow-hidden border-t border-[var(--surface-border)]"
             >
               <div className="max-h-[60vh] overflow-auto px-2 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2">
                 <ul className="flex flex-col gap-1">
@@ -129,10 +129,10 @@ export default function Navbar() {
                     <li key={item.path}>
                       <Link
                         href={item.path}
-                        className={`block w-full rounded-xl px-4 py-3 text-center text-base font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 ${
+                        className={`block w-full rounded-xl px-4 py-3 text-center text-base font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/50 ${
                           isActive(item.path)
-                            ? "text-white bg-white/10"
-                            : "text-white/90 hover:bg-white/10"
+                            ? "text-[var(--text-primary)] bg-[var(--surface-overlay)]"
+                            : "text-[var(--text-primary)] hover:bg-[var(--surface-overlay)]"
                         }`}
                       >
                         {item.title}
