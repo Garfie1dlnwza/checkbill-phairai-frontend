@@ -1,6 +1,6 @@
 "use client";
 import { toPng } from "html-to-image";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Download } from "lucide-react";
 
 type Item = {
@@ -43,6 +43,7 @@ export default function MinimalReceipt({
   const [showCutter, setShowCutter] = useState(false);
   const [isFullyRendered, setIsFullyRendered] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+  const receiptRef = useRef<HTMLDivElement>(null);
 
   const VAT_RATE = 0.07;
 
@@ -122,7 +123,7 @@ export default function MinimalReceipt({
     }, 100);
 
     return () => clearInterval(printInterval);
-  }, [items.length, persons.length, isPrinting, paymentInfo]);
+  }, [items.length, persons.length, isPrinting, paymentInfo.type]);
 
   const currentDate = new Date().toLocaleDateString("th-TH", {
     year: "numeric",
@@ -147,7 +148,7 @@ export default function MinimalReceipt({
     
     await new Promise(resolve => setTimeout(resolve, 100));
     
-    const node = document.getElementById("receipt-container");
+    const node = receiptRef.current;
     if (!node) {
       setIsExporting(false);
       setHidePrinterBody(false);
@@ -187,7 +188,7 @@ export default function MinimalReceipt({
 
   return (
     <div className="min-h-screen flex justify-center items-start py-4 sm:py-8 px-2 sm:px-4 text-gray-700">
-      <div id="receipt-container" className="relative w-full max-w-sm sm:max-w-md lg:max-w-lg">
+      <div ref={receiptRef} id="receipt-container" className="relative w-full max-w-sm sm:max-w-md lg:max-w-lg">
         <div className="w-full bg-white shadow-2xl relative overflow-hidden rounded-lg sm:rounded-none">
           {isPrinting && (
             <div
@@ -199,14 +200,16 @@ export default function MinimalReceipt({
             />
           )}
 
-          <div className="hidden sm:block h-4 bg-white relative overflow-hidden">
-            <div
-              className="absolute top-0 left-0 w-full h-4 bg-gray-100"
-              style={{
-                backgroundImage: `repeating-linear-gradient(90deg, transparent, transparent 8px, white 8px, white 12px)`,
-              }}
-            />
-          </div>
+          {!hidePrinterBody && (
+            <div className="hidden sm:block h-4 bg-white relative overflow-hidden">
+              <div
+                className="absolute top-0 left-0 w-full h-4 bg-gray-100"
+                style={{
+                  backgroundImage: `repeating-linear-gradient(90deg, transparent, transparent 8px, white 8px, white 12px)`,
+                }}
+              />
+            </div>
+          )}
 
           <div className="px-4 sm:px-6 pb-4 sm:pb-6 font-mono text-xs sm:text-sm bg-white">
             {/* Header */}
