@@ -1,11 +1,12 @@
 "use client";
 import { useState, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
-import { Plus, Trash2, ShoppingCart, Edit2, RotateCcw } from "lucide-react";
+import { Plus, Trash2, ShoppingCart, Edit2, RotateCcw, Equal } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ListItemController, Item } from "@/controllers/ListItem.controller";
 import CardCreateItem from "@/components/CardCreateItem";
 import BadgeDivider from "@/components/BadgeDivider";
+import QuickSplitModal from "@/components/QuickSplitModal";
 const STORAGE_KEY = process.env.NEXT_PUBLIC_STORAGE_KEY;
 const DIVIDER_KEY = process.env.NEXT_PUBLIC_DIVIDER_KEY;
 
@@ -17,6 +18,7 @@ export default function ListItemPage() {
   const [personCount, setPersonCount] = useState(0);
   const [dividerPersons, setDividerPersons] = useState<string[]>([]);
   const [showCreate, setShowCreate] = useState(false);
+  const [showQuickSplit, setShowQuickSplit] = useState(false);
   const [editRow, setEditRow] = useState<Item | null>(null);
 
   useEffect(() => {
@@ -471,6 +473,13 @@ export default function ListItemPage() {
             <Plus size={20} />
             เพิ่มรายการ
           </button>
+          <button
+            onClick={() => setShowQuickSplit(true)}
+            className="flex items-center justify-center gap-2 px-4 sm:px-6 py-3 rounded-xl border border-[var(--surface-border)] bg-[var(--surface-overlay)] text-[var(--text-primary)] font-semibold hover:border-[var(--accent)]/50 hover:bg-[var(--surface-subtle)] transition-colors text-sm sm:text-base"
+          >
+            <Equal size={20} />
+            หารเท่ากัน
+          </button>
           
           {/* Clear Bill Button */}
           {(rows.length > 0 || personCount > 0) && (
@@ -488,6 +497,13 @@ export default function ListItemPage() {
           <CardCreateItem
             onSave={handleAddItem}
             onClose={() => setShowCreate(false)}
+          />
+        )}
+        {showQuickSplit && (
+          <QuickSplitModal
+            persons={dividerPersons}
+            onAdd={handleAddItem}
+            onClose={() => setShowQuickSplit(false)}
           />
         )}
         {editRow && (

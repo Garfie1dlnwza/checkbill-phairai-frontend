@@ -1,8 +1,8 @@
 "use client";
 import { useEffect, useState, useRef } from "react";
-import { toPng } from "html-to-image";
+import { toBlob } from "html-to-image";
 import { getColor } from "@/constants/color";
-import { Download } from "lucide-react";
+import { Share2 } from "lucide-react";
 
 const STORAGE_KEY = process.env.NEXT_PUBLIC_STORAGE_KEY;
 const DIVIDER_KEY = process.env.NEXT_PUBLIC_DIVIDER_KEY;
@@ -160,10 +160,7 @@ export default function ColorStyle({
   };
 
   const handleExportImage = async () => {
-    if (!isFullyRendered || isExporting) {
-      alert("กรุณารอให้แสดงผลเสร็จก่อนทำการ Export");
-      return;
-    }
+    if (!isFullyRendered || isExporting) return;
 
     setIsExporting(true);
     await new Promise((resolve) => setTimeout(resolve, 100));
@@ -175,31 +172,37 @@ export default function ColorStyle({
     }
 
     try {
-      const dataUrl = await toPng(node, {
+      const blob = await toBlob(node, {
         cacheBust: true,
         backgroundColor: "#fff",
         width: node.offsetWidth,
         height: node.offsetHeight,
-        style: {
-          transform: "scale(1)",
-          transformOrigin: "top left",
-        },
+        style: { transform: "scale(1)", transformOrigin: "top left" },
         filter: (n) => {
           const cls = n.className;
-          if (cls && typeof cls === "string") {
-            return !cls.includes("animate-pulse");
-          }
-          return true;
+          return !(typeof cls === "string" && cls.includes("animate-pulse"));
         },
       });
 
-      const link = document.createElement("a");
-      link.download = `color-receipt-${new Date().getTime()}.png`;
-      link.href = dataUrl;
-      link.click();
+      if (!blob) throw new Error("blob is null");
+
+      const filename = `receipt-${Date.now()}.png`;
+      const file = new File([blob], filename, { type: "image/png" });
+
+      if (navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ files: [file], title: "สรุปบิล" });
+      } else {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
+        a.click();
+        URL.revokeObjectURL(url);
+      }
     } catch (err) {
-      console.error("Export error:", err);
-      alert("Export failed. Please try again.");
+      if (err instanceof Error && err.name !== "AbortError") {
+        console.error("Export error:", err);
+      }
     } finally {
       setIsExporting(false);
     }
@@ -495,7 +498,7 @@ export default function ColorStyle({
           </div>
         </div>
 
-        {/* Export Button — outside the capture target so it never appears in exported images */}
+        {/* Share Button — outside the capture target so it never appears in exported images */}
         <div className="flex justify-center pt-4 sm:pt-6 lg:pt-8">
           <button
             onClick={handleExportImage}
@@ -505,18 +508,18 @@ export default function ColorStyle({
                 ? "opacity-50 cursor-not-allowed"
                 : "hover:bg-neutral-200"
             }`}
-            aria-label="Export as Image"
+            aria-label="แชร์รูปใบเสร็จ"
           >
-            <Download
+            <Share2
               size={16}
-              className={isExporting ? "animate-spin" : ""}
+              className={isExporting ? "animate-pulse" : ""}
             />
             <span className="text-sm sm:text-base">
               {isExporting
-                ? "Exporting..."
+                ? "กำลังเตรียม..."
                 : !isFullyRendered
-                ? "Loading..."
-                : "Export"}
+                ? "กำลังโหลด..."
+                : "แชร์รูป"}
             </span>
           </button>
         </div>

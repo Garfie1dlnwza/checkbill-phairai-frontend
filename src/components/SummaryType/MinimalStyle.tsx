@@ -1,7 +1,7 @@
 "use client";
-import { toPng } from "html-to-image";
+import { toBlob } from "html-to-image";
 import { useEffect, useState, useRef } from "react";
-import { Download } from "lucide-react";
+import { Share2 } from "lucide-react";
 
 type Item = {
   id: string;
@@ -138,16 +138,12 @@ export default function MinimalReceipt({
   };
 
   const handleExportImage = async () => {
-    if (!isFullyRendered || isExporting) {
-      alert("กรุณารอให้แสดงผลเสร็จก่อนทำการ Export");
-      return;
-    }
+    if (!isFullyRendered || isExporting) return;
 
     setIsExporting(true);
     setHidePrinterBody(true);
-    
-    await new Promise(resolve => setTimeout(resolve, 100));
-    
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
     const node = receiptRef.current;
     if (!node) {
       setIsExporting(false);
@@ -156,30 +152,37 @@ export default function MinimalReceipt({
     }
 
     try {
-      const dataUrl = await toPng(node, {
+      const blob = await toBlob(node, {
         cacheBust: true,
         backgroundColor: "#fff",
         width: node.offsetWidth,
         height: node.offsetHeight,
-        style: {
-          transform: 'scale(1)',
-          transformOrigin: 'top left',
+        style: { transform: "scale(1)", transformOrigin: "top left" },
+        filter: (n) => {
+          const cls = n.className;
+          return !(typeof cls === "string" && cls.includes("animate-pulse"));
         },
-        filter: (node) => {
-          if (node.className && typeof node.className === 'string') {
-            return !node.className.includes('animate-pulse');
-          }
-          return true;
-        }
       });
-      
-      const link = document.createElement("a");
-      link.download = `receipt-${new Date().getTime()}.png`;
-      link.href = dataUrl;
-      link.click();
+
+      if (!blob) throw new Error("blob is null");
+
+      const filename = `receipt-${Date.now()}.png`;
+      const file = new File([blob], filename, { type: "image/png" });
+
+      if (navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ files: [file], title: "สรุปบิล" });
+      } else {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
+        a.click();
+        URL.revokeObjectURL(url);
+      }
     } catch (err) {
-      console.error('Export error:', err);
-      alert("Export failed. Please try again.");
+      if (err instanceof Error && err.name !== "AbortError") {
+        console.error("Export error:", err);
+      }
     } finally {
       setHidePrinterBody(false);
       setIsExporting(false);
@@ -473,25 +476,23 @@ export default function MinimalReceipt({
               <button
                 onClick={handleExportImage}
                 disabled={!isFullyRendered || isExporting}
-                className={`flex items-center gap-2 text-gray-700 bg-white sm:bg-transparent border border-gray-300 sm:border-0 px-4 py-2 sm:p-1 rounded-xl transition-colors shadow-sm sm:shadow-none w-full sm:w-auto justify-center ${
-                  !isFullyRendered || isExporting 
-                    ? 'opacity-50 cursor-not-allowed' 
-                    : 'hover:bg-gray-100 sm:hover:bg-gray-200'
+                className={`flex items-center gap-2 text-gray-700 bg-white border border-gray-300 px-4 py-2 rounded-xl transition-colors shadow-sm w-full sm:w-auto justify-center ${
+                  !isFullyRendered || isExporting
+                    ? "opacity-50 cursor-not-allowed"
+                    : "hover:bg-gray-100"
                 }`}
-                aria-label="Export as Image"
+                aria-label="แชร์รูปใบเสร็จ"
               >
-                <Download size={16} className={`sm:hidden ${isExporting ? 'animate-spin' : ''}`} />
-                <svg className="hidden sm:block" width="18" height="18" fill="none" viewBox="0 0 24 24">
-                  <path
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M12 17v-6m0 0-2 2m2-2 2 2M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7M12 3v8"
-                  />
-                </svg>
+                <Share2
+                  size={16}
+                  className={isExporting ? "animate-pulse" : ""}
+                />
                 <span className="text-sm font-medium">
-                  {isExporting ? 'Exporting...' : !isFullyRendered ? 'Loading...' : 'Export'}
+                  {isExporting
+                    ? "กำลังเตรียม..."
+                    : !isFullyRendered
+                    ? "กำลังโหลด..."
+                    : "แชร์รูป"}
                 </span>
               </button>
             </div>
