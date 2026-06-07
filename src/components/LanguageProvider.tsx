@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { translations, Lang, TranslationKey } from "@/i18n/translations";
 
 const LangContext = createContext<{
@@ -23,8 +23,10 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     } catch {}
   }, []);
 
-  const t = (key: TranslationKey): string =>
-    (translations[lang][key] as string) ?? key;
+  const t = useCallback(
+    (key: TranslationKey): string => (translations[lang][key] as string) ?? key,
+    [lang]
+  );
 
   const toggle = () => {
     setLang((prev) => {

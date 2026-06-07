@@ -65,7 +65,7 @@ export default function PaymentSettingsModal({
         setIsUploading(false);
       }
     },
-    []
+    [t]
   );
 
   const handleFileUpload = useCallback(
@@ -143,7 +143,7 @@ export default function PaymentSettingsModal({
 
     onSave(formData);
     onClose();
-  }, [formData, onSave, onClose]);
+  }, [formData, onSave, onClose, t]);
 
   const isFormValid = useMemo(() => {
     if (formData.type === "none") return true;
